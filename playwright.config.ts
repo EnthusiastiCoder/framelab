@@ -3,7 +3,9 @@ import { existsSync } from 'node:fs';
 
 // e2e tests run against the real build served by scripts/serve-dist.mjs, which applies dist/_headers.
 // BASE_URL points the suite at a live deploy (WS6 @smoke) and skips the local server.
-const PORT = Number(process.env.PORT ?? 4173);
+const PORT = Number(process.env.PORT ?? 4799);
+// Not 4173: that is the Vite preview default and another local project (JEE Quest) already listens there,
+// which reuseExistingServer would silently reuse.
 const BASE_URL = process.env.BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 // Until WS1 lands scripts/serve-dist.mjs there is no app to serve; tests then fail on navigation
