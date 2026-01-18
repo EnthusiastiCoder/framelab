@@ -1,0 +1,16 @@
+// Framelab: static Astro site with Svelte islands. Every page is prerendered into dist/.
+import { defineConfig } from 'astro/config';
+import svelte from '@astrojs/svelte';
+
+export default defineConfig({
+  output: 'static',
+  site: 'https://framelab.pages.dev',
+  trailingSlash: 'ignore',
+  build: { format: 'directory', inlineStylesheets: 'never' },
+  integrations: [svelte()],
+  vite: {
+    // Never inline scripts or assets: the CSP allows only same-origin scripts plus the hashed island bootstrap.
+    build: { assetsInlineLimit: 0 },
+    worker: { format: 'es' },
+  },
+});
