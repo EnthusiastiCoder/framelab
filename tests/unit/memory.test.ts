@@ -1,4 +1,5 @@
 // U3 memory: src/engine/memory.ts (PURE)
+// v1 is WebCodecs-only (CTO decision): the ffmpeg-path input limit case was removed.
 // API: assessMemory({ inputSize, outputEstimate, caps: { fileSystemAccess, deviceMemory }, path })
 //   -> { ok: boolean; sink: 'disk' | 'memory'; warn?: boolean; block?: boolean; message: string }
 import { describe, it, expect } from 'vitest';
@@ -59,19 +60,6 @@ describe('U3 memory policy', () => {
     expect(r.block).toBe(true);
     expect(r.ok).toBe(false);
     expect(r.message.length).toBeGreaterThan(0);
-  });
-
-  it('ffmpeg path blocks input over 2 GiB and mentions Chrome/Edge', async () => {
-    const { assessMemory } = await load();
-    const r = assessMemory({
-      inputSize: 2 * GiB + MiB,
-      outputEstimate: 100 * MiB,
-      caps: { fileSystemAccess: true, deviceMemory: 8 },
-      path: 'ffmpeg',
-    });
-    expect(r.block).toBe(true);
-    expect(r.ok).toBe(false);
-    expect(r.message).toMatch(/Chrome|Edge/);
   });
 
   it('webcodecs path has no input size limit', async () => {
