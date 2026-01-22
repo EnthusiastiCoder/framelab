@@ -1,5 +1,7 @@
 // U2 planner: src/engine/planner.ts (PURE)
-// API: planPath(job, caps, inputInfo, opts?: { forceFfmpeg?: boolean }) -> { path: 'webcodecs' | 'ffmpeg'; reason: string }
+// API: planPath(job, caps, inputInfo) -> { path: 'webcodecs' | 'unsupported'; reason: string; output?; fallback? }
+// v1 is WebCodecs-only (CTO decision, no ffmpeg): a missing encoder falls back to another format the browser can
+// encode (WebM: VP9/AV1 + Opus) with a reason, or gives 'unsupported' with a reason.
 //   job.output: { container, videoCodec?, audioCodec? }   (codec names as in mediabunny: 'avc','vp9','aac','opus','mp3','flac',...)
 //   caps: { webCodecs: boolean; canEncode: Record<codec, boolean>; canDecode: Record<codec, boolean> }
 //   inputInfo: { container, videoCodec?, audioCodec? }
@@ -32,36 +34,52 @@ describe('U2 planner', () => {
     expect(typeof plan.reason).toBe('string');
   });
 
-  it('picks ffmpeg when an encoder is missing (AAC on Firefox) and explains why', async () => {
+  it('falls back to WebM/Opus when an encoder is missing (AAC on Firefox) and explains why', async () => {
     const { planPath } = await load();
     const job = { op: 'convert', output: { container: 'mp4', videoCodec: 'avc', audioCodec: 'aac' } };
     const plan = planPath(job, firefoxCaps, webmIn);
-    expect(plan.path).toBe('ffmpeg');
+    expect(['webcodecs', 'unsupported']).toContain(plan.path);
+    if (plan.path === 'webcodecs') {
+      expect(plan.fallback).toBe(true);
+      expect(plan.output?.audioCodec).not.toBe('aac');
+      expect(plan.output?.container).toBe('webm');
+    }
     expect(plan.reason.length).toBeGreaterThan(0);
     expect(plan.reason.toLowerCase()).toContain('aac');
   });
 
-  it('picks ffmpeg when WebCodecs is missing entirely', async () => {
+  it('falls back to WebM when H.264 cannot be encoded (bundled Chromium)', async () => {
+    const { planPath } = await load();
+    const noAvc = { ...chromeCaps, canEncode: { ...chromeCaps.canEncode, avc: false, aac: false } };
+    const job = { op: 'convert', output: { container: 'mp4', videoCodec: 'avc', audioCodec: 'aac' } };
+    const plan = planPath(job, noAvc, webmIn);
+    expect(plan.path).toBe('webcodecs');
+    expect(plan.fallback).toBe(true);
+    expect(plan.output).toEqual({ container: 'webm', videoCodec: 'vp9', audioCodec: 'opus' });
+    expect(plan.reason).toMatch(/WebM/);
+  });
+
+  it('is unsupported when WebCodecs is missing entirely', async () => {
     const { planPath } = await load();
     const job = { op: 'mute', output: { container: 'mp4', videoCodec: 'avc' } };
     const plan = planPath(job, { webCodecs: false, canEncode: {}, canDecode: {} }, mp4In);
-    expect(plan.path).toBe('ffmpeg');
+    expect(plan.path).toBe('unsupported');
     expect(plan.reason.length).toBeGreaterThan(0);
   });
 
-  it('forceFfmpeg always gives ffmpeg', async () => {
+  it('mute copies the video stream, so it needs no encoder', async () => {
     const { planPath } = await load();
     const job = { op: 'mute', output: { container: 'mp4', videoCodec: 'avc' } };
-    const plan = planPath(job, chromeCaps, mp4In, { forceFfmpeg: true });
-    expect(plan.path).toBe('ffmpeg');
-    expect(plan.reason.length).toBeGreaterThan(0);
+    const none = { webCodecs: true, canEncode: {}, canDecode: {} };
+    const plan = planPath(job, none, mp4In);
+    expect(plan.path).toBe('webcodecs');
   });
 
-  it('picks ffmpeg for FLAC output', async () => {
+  it('FLAC output is unsupported in v1 and says so', async () => {
     const { planPath } = await load();
     const job = { op: 'audio-convert', output: { container: 'flac', audioCodec: 'flac' } };
     const plan = planPath(job, chromeCaps, { container: 'mp3', audioCodec: 'mp3' });
-    expect(plan.path).toBe('ffmpeg');
+    expect(plan.path).toBe('unsupported');
     expect(plan.reason.toLowerCase()).toContain('flac');
   });
 });
