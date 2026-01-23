@@ -1,24 +1,11 @@
-// U5 ffmpeg args (mute): src/engine/ffmpeg/args.ts (PURE) + src/engine/output.ts
-// API: buildFfmpegArgs(job, io: { input: string; output: string }): string[]
-//      outputFilename(inputName: string, ext: string): string   -> "<name>-framelab.<ext>"
+// U5 output naming (mute): src/engine/output.ts
+// API: outputFilename(inputName: string, ext: string): string   -> "<name>-framelab.<ext>"
+// v1 is WebCodecs-only (CTO decision): the buildFfmpegArgs case was removed; the naming case stays.
 import { describe, it, expect } from 'vitest';
 
-const loadArgs = () => import('../../src/engine/ffmpeg/args');
 const loadOutput = () => import('../../src/engine/output');
 
-describe('U5 ffmpeg args (mute)', () => {
-  it('builds -i <in> -c:v copy -an <out>', async () => {
-    const { buildFfmpegArgs } = await loadArgs();
-    expect(buildFfmpegArgs({ op: 'mute' }, { input: '/in/clip.mp4', output: 'clip-framelab.mp4' })).toEqual([
-      '-i',
-      '/in/clip.mp4',
-      '-c:v',
-      'copy',
-      '-an',
-      'clip-framelab.mp4',
-    ]);
-  });
-
+describe('U5 output naming (mute)', () => {
   it('suggests an output name ending in -framelab.mp4', async () => {
     const { outputFilename } = await loadOutput();
     expect(outputFilename('clip.mp4', 'mp4')).toBe('clip-framelab.mp4');
