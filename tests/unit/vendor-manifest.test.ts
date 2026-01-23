@@ -1,8 +1,9 @@
-// U8 vendor manifest: scripts/vendor-assets.mjs + src/engine/ffmpeg/loader.ts
+// U8 vendor manifest: scripts/vendor-assets.mjs + src/engine/assets/loader.ts
 // API (vendor-assets.mjs, must not run its CLI when imported):
 //   planChunks(size: number, maxPart = 24 * 1024 * 1024): Array<{ offset: number; length: number }>
 //   splitBuffer(buf: Uint8Array, maxPart?): Uint8Array[]
 //   sha256Hex(buf: Uint8Array): string   (lower-case hex)
+// (The loader moved from src/engine/ffmpeg/ to src/engine/assets/ when ffmpeg was dropped from v1.)
 // API (loader.ts): assembleParts(parts: Array<ArrayBuffer | Uint8Array>, expectedSha256: string): Promise<Blob>
 //   rejects when the SHA-256 of the joined bytes does not match.
 // The same chunking also serves the self-hosted Whisper model files (decision 3, WS0).
@@ -10,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
 
 const loadVendor = () => import('../../scripts/vendor-assets.mjs');
-const loadLoader = () => import('../../src/engine/ffmpeg/loader');
+const loadLoader = () => import('../../src/engine/assets/loader');
 
 const MiB = 1024 * 1024;
 
