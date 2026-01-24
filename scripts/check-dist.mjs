@@ -19,6 +19,10 @@ const URL_RE = /https?:\/\/[^\s"'`<>()\\]+/gi;
 const ALLOWED_URL = [
   /^https?:\/\/www\.w3\.org\//i,
   /^https:\/\/svelte\.dev\/e\//i,
+  // mediabunny: its MPL-2.0 licence header (must be kept) and spec links inside codec error messages.
+  /^https?:\/\/mozilla\.org\/MPL\/2\.0\/?\.?$/i,
+  /^https:\/\/www\.webmproject\.org\/vp9\/mp4\/?\.?$/i,
+  /^https:\/\/aomediacodec\.github\.io\/av1-isobmff\/?\.?$/i,
 ];
 
 /** Pages whose job is to link to licences and sources. */
