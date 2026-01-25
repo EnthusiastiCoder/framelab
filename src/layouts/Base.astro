@@ -1,0 +1,119 @@
+---
+// Base page shell: meta, skip link (first Tab stop), header, <main id="main">, footer.
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/', label: 'Tools' },
+  { href: '/privacy', label: 'Privacy' },
+  { href: '/about', label: 'About' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="referrer" content="no-referrer" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <div class="container header-row">
+        <a class="brand" href="/" aria-label="Framelab home">
+          <svg aria-hidden="true" width="26" height="26" viewBox="0 0 32 32"><rect x="3" y="6" width="26" height="20" rx="5" fill="currentColor" opacity="0.18"></rect><path d="M13 11.5v9l8-4.5z" fill="currentColor"></path></svg>
+          <span>Framelab</span>
+        </a>
+        <nav aria-label="Main">
+          <ul>
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={path === item.href || path === `${item.href}/` ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p>Everything runs in your browser. Your files never leave your device.</p>
+        <p>
+          <a href="/privacy">Privacy</a> · <a href="/licenses">Licences</a> · <a href="/about">About</a>
+        </p>
+        <p class="muted">© Arpan Mandal. All Rights Reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: 60px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-decoration: none;
+  }
+  .brand svg {
+    color: var(--accent);
+  }
+  nav ul {
+    display: flex;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--text);
+  }
+  .site-footer {
+    margin-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.9rem;
+  }
+  .footer-row {
+    padding-block: var(--space-5);
+  }
+  .footer-row p {
+    margin: 0 0 var(--space-2);
+  }
+</style>
