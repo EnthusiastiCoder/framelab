@@ -1,0 +1,69 @@
+/* Design tokens. Light by default, dark via prefers-color-scheme. Text/background pairs meet WCAG AA. */
+:root {
+  color-scheme: light dark;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace;
+
+  --bg: #f7f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef0f6;
+  --text: #15171f;
+  --text-muted: #4a5063;
+  --border: #d5d9e4;
+  --accent: #4c3fd6;
+  --accent-hover: #3a2fb8;
+  --accent-text: #ffffff;
+  --accent-soft: #ebe9ff;
+  --success: #12733d;
+  --success-soft: #e3f5ea;
+  --warning: #8a5300;
+  --warning-soft: #fff3dc;
+  --danger: #b4232f;
+  --danger-soft: #fde8ea;
+  --focus: #4c3fd6;
+
+  --radius-sm: 6px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --shadow: 0 1px 2px rgb(15 18 30 / 6%), 0 4px 16px rgb(15 18 30 / 6%);
+  --content: 1080px;
+  --duration: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1117;
+    --surface: #171a23;
+    --surface-2: #20242f;
+    --text: #eceef4;
+    --text-muted: #a9afc0;
+    --border: #2f3442;
+    --accent: #9d94ff;
+    --accent-hover: #b8b2ff;
+    --accent-text: #11131a;
+    --accent-soft: #252145;
+    --success: #5fd391;
+    --success-soft: #15291e;
+    --warning: #f2b45a;
+    --warning-soft: #2c2213;
+    --danger: #ff8a93;
+    --danger-soft: #331a1d;
+    --focus: #b8b2ff;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration: 0ms;
+  }
+}
