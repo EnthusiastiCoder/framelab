@@ -1,0 +1,26 @@
+---
+// One landing page per tool. The registry (src/lib/tools.ts) and the content collection must match exactly.
+import { getCollection, render } from 'astro:content';
+import ToolPage from '../layouts/ToolPage.astro';
+import MuteVideo from '../components/tools/MuteVideo.svelte';
+import { tools } from '../lib/tools';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('tools');
+  const registry = tools.map((t) => t.slug).sort();
+  const content = entries.map((e) => e.id).sort();
+  if (registry.join(',') !== content.join(',')) {
+    throw new Error(`Tool registry and content differ. Registry: ${registry.join(', ')}. Content: ${content.join(', ')}.`);
+  }
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const slug = entry.id;
+---
+
+<ToolPage {...entry.data}>
+  {slug === 'mute-video' && <MuteVideo client:load />}
+  <Content slot="body" />
+</ToolPage>
