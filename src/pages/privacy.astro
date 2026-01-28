@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Privacy | Framelab"
+  description="Framelab processes your videos on your own device. No uploads, no analytics, no cookies, no ads and no requests to other sites. Here is exactly how that works."
+>
+  <article class="container prose">
+    <h1>Privacy</h1>
+    <p><strong>Your files never leave your device.</strong> Framelab reads and writes media inside your browser with WebCodecs. Nothing is uploaded.</p>
+    <h2>What we do not do</h2>
+    <ul>
+      <li>No uploads: there is no server that receives your files.</li>
+      <li>No analytics, no tracking pixels, no cookies and no ads.</li>
+      <li>No requests to other sites. The site's security policy only allows connections to this site itself.</li>
+      <li>No accounts and no sign-up.</li>
+    </ul>
+    <h2>How you can check</h2>
+    <p>Every tool shows a badge counting requests to other sites; it stays at zero. You can also open your browser's developer tools and look at the network tab while you work.</p>
+    <h2>What the site stores</h2>
+    <p>Nothing about you. Your browser may cache the site's own files so it loads faster next time.</p>
+  </article>
+</Base>
+
+<style>
+  .prose {
+    max-width: 70ch;
+    padding-top: var(--space-6);
+  }
+</style>
