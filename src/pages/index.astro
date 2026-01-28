@@ -1,0 +1,67 @@
+---
+// Home: what Framelab is, and every tool.
+import Base from '../layouts/Base.astro';
+import { tools } from '../lib/tools';
+---
+
+<Base
+  title="Framelab: free private video tools in your browser"
+  description="Mute, trim, compress and convert videos right in your browser. No upload, no watermark, no sign-up and no limits. Your files never leave your device."
+>
+  <div class="container home">
+    <section class="hero">
+      <h1>Video tools that never upload your files</h1>
+      <p class="lead">Framelab runs entirely in your browser. No watermark, no sign-up, no limits, and nothing leaves your device.</p>
+    </section>
+    <section aria-labelledby="tools-title">
+      <h2 id="tools-title">Tools</h2>
+      <ul class="grid">
+        {
+          tools.map((t) => (
+            <li>
+              <a class="tool card" href={`/${t.slug}`}>
+                <span class="tool-title">{t.title}</span>
+                <span class="muted">{t.blurb}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="muted">More tools are on the way: compress, convert, trim, cut, GIF, audio and subtitles.</p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .home {
+    padding-top: var(--space-7);
+  }
+  .lead {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    max-width: 60ch;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+    list-style: none;
+    padding: 0;
+  }
+  .tool {
+    display: grid;
+    gap: var(--space-1);
+    height: 100%;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color var(--duration);
+  }
+  .tool:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .tool-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+</style>
