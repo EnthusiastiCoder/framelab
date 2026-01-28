@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="About | Framelab"
+  description="Framelab is a set of free video tools that run entirely in your browser: no upload, no watermark, no sign-up and no limits. Built by Arpan Mandal."
+>
+  <article class="container prose">
+    <h1>About Framelab</h1>
+    <p>Framelab is a set of free video tools that run entirely in your browser. There is no upload, no watermark, no sign-up and no limit on length, size or daily use.</p>
+    <p>
+      It uses WebCodecs, the media engine built into modern browsers, through the open-source <a href="https://github.com/Vanilagy/mediabunny">Mediabunny</a> library.
+      Because the work happens on your device, it is as private as it is fast.
+    </p>
+    <p>Framelab works in recent versions of Chrome, Edge, Safari and Firefox.</p>
+    <p>See the <a href="/licenses">licences</a> for the open-source software it is built with.</p>
+    <p class="muted">© Arpan Mandal. All Rights Reserved.</p>
+  </article>
+</Base>
+
+<style>
+  .prose {
+    max-width: 70ch;
+    padding-top: var(--space-6);
+  }
+</style>
