@@ -1,9 +1,12 @@
-// E3: /mute-video on the WebCodecs path. E4: the same with ?engine=ffmpeg. E6: Cancel on the ffmpeg job.
+// E3: /mute-video on the WebCodecs path.
+// E4 (adapted, CTO: v1 is WebCodecs-only): without WebCodecs the page shows the unsupported-browser notice.
+// E6 (adapted): Cancel on the WebCodecs mute job, slowed by the ?slow=1 test hook so there is time to cancel.
 import { test, expect } from '@playwright/test';
 import { basename } from 'node:path';
 import { FIXTURES } from '../helpers/fixtures';
 import { engineChip, loadFile, openTool, runAndDownload } from '../helpers/app';
 import { probe } from '../helpers/probe';
+import { recordPageErrors } from '../helpers/network';
 
 async function expectMuted(path: string) {
   expect(basename(path)).toMatch(/-framelab\.mp4$/);
@@ -23,16 +26,25 @@ test.describe('mute video', () => {
     await expectMuted(await runAndDownload(page, info.outputPath('out')));
   });
 
-  test('E4 mutes on the ffmpeg path and the chip says Compatibility', async ({ page }, info) => {
-    await openTool(page, 'mute-video', '?engine=ffmpeg');
-    expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
-    await loadFile(page, FIXTURES.h264);
-    expect(await engineChip(page)).toContain('Compatibility (ffmpeg)');
-    await expectMuted(await runAndDownload(page, info.outputPath('out')));
+  test('E4 without WebCodecs the page says the browser is unsupported and names the alternatives', async ({ page }) => {
+    const errors = recordPageErrors(page);
+    await page.addInitScript(() => {
+      // @ts-expect-error deleting platform globals on purpose
+      delete window.VideoEncoder;
+      // @ts-expect-error deleting platform globals on purpose
+      delete window.VideoDecoder;
+    });
+    await openTool(page, 'mute-video');
+    const notice = page.getByTestId('unsupported-browser');
+    await expect(notice).toBeVisible();
+    const text = await notice.innerText();
+    for (const name of ['Chrome', 'Edge', 'Safari', 'Firefox']) expect(text).toContain(name);
+    await expect(page.getByTestId('run')).toBeDisabled();
+    expect(errors.map((e) => e.message)).toEqual([]);
   });
 
-  test('E6 Cancel during the ffmpeg mute job returns to ready, and a second run succeeds', async ({ page }, info) => {
-    await openTool(page, 'mute-video', '?engine=ffmpeg');
+  test('E6 Cancel during the mute job returns to ready, and a second run succeeds', async ({ page }, info) => {
+    await openTool(page, 'mute-video', '?slow=1');
     await loadFile(page, FIXTURES.h264);
     await page.getByTestId('run').click();
     await expect(page.getByTestId('progress')).toBeVisible();
