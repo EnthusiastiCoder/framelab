@@ -1,11 +1,12 @@
-// E8 @cross: a CapabilityBanner appears when VideoEncoder is deleted through an init script,
-// and the tool still works through ffmpeg.
+// E8 @cross: a CapabilityBanner appears when VideoEncoder is deleted through an init script.
+// Adapted (CTO: v1 is WebCodecs-only, no ffmpeg fallback): instead of "mute works via ffmpeg", the tool shows the
+// unsupported-browser notice naming the browsers to use, the run button stays disabled, and nothing throws.
 import { test, expect } from '@playwright/test';
-import { FIXTURES } from '../helpers/fixtures';
-import { engineChip, loadFile, openTool, runAndDownload } from '../helpers/app';
-import { probe } from '../helpers/probe';
+import { openTool } from '../helpers/app';
+import { recordPageErrors } from '../helpers/network';
 
-test('E8 without VideoEncoder the banner shows and mute works via ffmpeg @cross', async ({ page }, info) => {
+test('E8 without VideoEncoder the banner and the unsupported notice show @cross', async ({ page }) => {
+  const errors = recordPageErrors(page);
   await page.addInitScript(() => {
     // @ts-expect-error deleting a platform global on purpose
     delete window.VideoEncoder;
@@ -14,12 +15,12 @@ test('E8 without VideoEncoder the banner shows and mute works via ffmpeg @cross'
   const banner = page.getByTestId('capability-banner');
   await expect(banner).toBeVisible();
   expect((await banner.innerText()).trim().length).toBeGreaterThan(10);
-  await loadFile(page, FIXTURES.h264);
-  expect(await engineChip(page)).toContain('Compatibility');
-  const p = await probe(await runAndDownload(page, info.outputPath('out')));
-  expect(p.audioTracks).toBe(0);
-  expect(p.videoTracks).toBe(1);
-  expect(Math.abs(p.duration - 5)).toBeLessThanOrEqual(0.1);
+  const notice = page.getByTestId('unsupported-browser');
+  await expect(notice).toBeVisible();
+  const text = await notice.innerText();
+  for (const name of ['Chrome', 'Edge', 'Safari', 'Firefox']) expect(text).toContain(name);
+  await expect(page.getByTestId('run')).toBeDisabled();
+  expect(errors.map((e) => e.message)).toEqual([]);
 });
 
 test('E8 the banner is absent when everything is supported', async ({ page }) => {
