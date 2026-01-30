@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "@astrojs/svelte": "^7.2.5",
+    "@mediabunny/flac-encoder": "^1.66.2",
+    "@mediabunny/mp3-encoder": "^1.66.2",
     "astro": "^5.18.2",
+    "gifenc": "^1.0.3",
     "mediabunny": "^1.66.2",
     "svelte": "^5.59.1"
   },
