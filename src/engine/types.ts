@@ -1,7 +1,10 @@
 // Shared engine types: jobs, progress, results and error codes. Pure types, no runtime dependencies.
 
-/** The engine path a job runs on. v1 is WebCodecs-only; 'unsupported' means the browser lacks what the job needs. */
-export type EnginePath = 'webcodecs' | 'unsupported';
+/**
+ * The engine path a job runs on. 'webcodecs' uses the browser's encoders; 'wasm' adds a bundled WebAssembly audio
+ * encoder (MP3, FLAC) where WebCodecs has none; 'unsupported' means the browser lacks what the job needs.
+ */
+export type EnginePath = 'webcodecs' | 'wasm' | 'unsupported';
 
 export interface OutputSpec {
   container: string;
