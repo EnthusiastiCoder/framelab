@@ -31,6 +31,9 @@ export const AUDIO_CODECS: Record<string, string> = {
   flac: 'flac',
 };
 
+/** Codecs a bundled WebAssembly encoder can produce when WebCodecs cannot (planner caps.wasmEncoders). */
+export const WASM_ENCODERS: Record<string, boolean> = { mp3: true, flac: true };
+
 type AnyGlobal = Record<string, any>;
 
 const isFn = (v: unknown): boolean => typeof v === 'function';
