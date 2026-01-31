@@ -20,6 +20,7 @@ export const MIME: Record<string, string> = {
   wav: 'audio/wav',
   ogg: 'audio/ogg',
   gif: 'image/gif',
+  flac: 'audio/flac',
 };
 
 export function memorySink(): BufferTarget {
