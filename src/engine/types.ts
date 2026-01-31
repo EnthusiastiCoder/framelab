@@ -17,14 +17,69 @@ export interface MuteJob {
   output?: OutputSpec;
 }
 
-/** Generic convert-style job shape (WS2 widens the union with compress, convert, trim, ...). */
+/** Generic convert-style job shape. */
 export interface ConvertJob {
   op: string;
   output: OutputSpec;
   [option: string]: unknown;
 }
 
-export type Job = MuteJob | ConvertJob;
+export interface CropRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * One job shape for every op that maps onto a single mediabunny Conversion: compress, convert, trim, resize,
+ * extract-audio, audio-cut and audio-convert. `output` is the planned output (after any fallback).
+ */
+export interface TranscodeJob {
+  op: 'compress' | 'convert' | 'trim' | 'resize' | 'extract-audio' | 'audio-cut' | 'audio-convert';
+  output: OutputSpec;
+  /** Seconds in the input. */
+  trim?: { start: number; end: number };
+  /** Fast trim: copy packets, snapping the start to the previous keyframe (no re-encode). */
+  copyOnly?: boolean;
+  /** Re-encode every stream even when the codec already matches. */
+  forceTranscode?: boolean;
+  videoBitrate?: number;
+  audioBitrate?: number;
+  /** Resize/crop: the region of the input that is used, the output size and where the region lands in it. */
+  layout?: { output: { width: number; height: number }; source: CropRect; dest: CropRect };
+  /** Fill the padding of a fit layout with a blurred, scaled copy of the frame. */
+  blur?: boolean;
+  /** Linear audio fades in seconds (audio cutter). */
+  fade?: { fadeIn: number; fadeOut: number };
+}
+
+/** Cut: keeps the given ranges of the input and joins them. */
+export interface CutJob {
+  op: 'cut';
+  output: OutputSpec;
+  keep: Array<[number, number]>;
+  videoBitrate?: number;
+}
+
+/** Video to GIF. */
+export interface GifJob {
+  op: 'gif';
+  output?: OutputSpec;
+  start: number;
+  end: number;
+  fps: number;
+  width: number;
+}
+
+/** Waveform peaks of the first audio track (audio cutter display). */
+export interface PeaksJob {
+  op: 'peaks';
+  output?: OutputSpec;
+  count: number;
+}
+
+export type Job = MuteJob | TranscodeJob | CutJob | GifJob | PeaksJob;
 
 export interface Progress {
   phase: 'reading' | 'processing' | 'writing' | 'done';
@@ -34,6 +89,8 @@ export interface Progress {
 }
 
 export interface Result {
+  /** Peaks jobs return their peaks here and an empty blob. */
+  peaks?: Float32Array;
   blob: Blob;
   filename: string;
   mimeType: string;
