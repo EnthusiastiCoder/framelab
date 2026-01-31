@@ -2,6 +2,7 @@
 // v1 is WebCodecs-only (no ffmpeg). When the requested output can't be encoded, the planner falls back to
 // another container/codec the browser can encode (WebM: VP9/AV1 + Opus) and says so; when nothing works it
 // returns 'unsupported' with a reason the UI shows on the unsupported-browser notice.
+// Audio codecs WebCodecs lacks (MP3, FLAC) run on the "wasm" path when caps.wasmEncoders says a bundled encoder exists.
 
 import type { EnginePath, OutputSpec } from './types';
 
@@ -9,6 +10,8 @@ export interface PlannerCaps {
   webCodecs: boolean;
   canEncode: Record<string, boolean>;
   canDecode: Record<string, boolean>;
+  /** Codecs a bundled WebAssembly encoder can produce when WebCodecs cannot (the app passes mp3 and flac). */
+  wasmEncoders?: Record<string, boolean>;
 }
 
 export interface PlannerInput {
@@ -33,11 +36,14 @@ export interface Plan {
   fallback?: boolean;
 }
 
-/** Codecs WebCodecs can never encode in v1 (no ffmpeg, no JS encoder yet). */
+/** Codecs WebCodecs never encodes; only a bundled WebAssembly encoder (caps.wasmEncoders) can produce them. */
 const NEVER_ENCODED = new Set(['flac']);
 
+/** PCM is written in plain JS by mediabunny, so it never needs an encoder. */
+const isPcm = (c: string) => c.startsWith('pcm-');
+
 const LABEL: Record<string, string> = {
-  avc: 'H.264', hevc: 'H.265', vp8: 'VP8', vp9: 'VP9', av1: 'AV1', aac: 'AAC', opus: 'Opus', mp3: 'MP3', flac: 'FLAC',
+  'pcm-s16': 'WAV', avc: 'H.264', hevc: 'H.265', vp8: 'VP8', vp9: 'VP9', av1: 'AV1', aac: 'AAC', opus: 'Opus', mp3: 'MP3', flac: 'FLAC',
 };
 const label = (c: string) => LABEL[c] ?? c.toUpperCase();
 
@@ -69,7 +75,7 @@ function needs(job: PlannerJob, input: PlannerInput, out: OutputSpec) {
 function missing(caps: PlannerCaps, job: PlannerJob, input: PlannerInput, out: OutputSpec) {
   const { encode, decode } = needs(job, input, out);
   return {
-    encode: encode.filter((c) => NEVER_ENCODED.has(c) || !caps.canEncode[c]),
+    encode: encode.filter((c) => !isPcm(c) && (NEVER_ENCODED.has(c) || !caps.canEncode[c])),
     decode: decode.filter((c) => !caps.canDecode[c]),
   };
 }
@@ -116,10 +122,25 @@ export function planPath(job: PlannerJob, caps: PlannerCaps, inputInfo: PlannerI
   }
 
   const what = m.encode.map(label).join(' and ');
+  if (m.encode.every((c) => caps.wasmEncoders?.[c])) {
+    return {
+      path: 'wasm',
+      reason: `WebCodecs has no ${what} encoder, so a bundled WebAssembly encoder is used.`,
+      output: out,
+    };
+  }
   if (m.encode.some((c) => NEVER_ENCODED.has(c))) {
     return { path: 'unsupported', reason: `${what} output is not available in this version of Framelab; pick another format.` };
   }
-  const fb = out.container === 'webm' ? null : webmFallback(caps, job, inputInfo, out);
+  if (!out.videoCodec && out.audioCodec !== 'opus' && caps.canEncode.opus) {
+    return {
+      path: 'webcodecs',
+      reason: `Your browser can't encode ${what} locally, so ${out.container.toUpperCase()} isn't possible here; saving as OGG (Opus) instead.`,
+      output: { container: 'ogg', audioCodec: 'opus' },
+      fallback: true,
+    };
+  }
+  const fb = out.container === 'webm' || !out.videoCodec ? null : webmFallback(caps, job, inputInfo, out);
   if (fb) {
     const container = out.container.toUpperCase();
     return {
