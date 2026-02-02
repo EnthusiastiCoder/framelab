@@ -1,9 +1,12 @@
 // Engine worker (module worker). All media work runs here, off the main thread.
 // Protocol (main -> worker): probe | run | cancel. (worker -> main): probe-result | progress | result | error.
 
-import { EngineError, toErrorCode, type Job, type Progress } from './types';
+import { EngineError, toErrorCode, type Job, type Progress, type Result } from './types';
 import { probeFile } from './mediabunny/probe';
-import { mute } from './mediabunny/convert';
+import { mute, transcode, type RunOptions } from './mediabunny/convert';
+import { cut } from './mediabunny/ranges';
+import { toGif } from './mediabunny/gif';
+import { audioPeaks } from './mediabunny/audio';
 
 export type WorkerRequest =
   | { type: 'probe'; id: number; file: File }
@@ -29,6 +32,31 @@ function fail(id: number, err: unknown) {
   scope.postMessage({ type: 'error', id, code, message });
 }
 
+async function dispatch(job: Job, file: File, opts: RunOptions): Promise<Result> {
+  switch (job.op) {
+    case 'mute':
+      return mute(file, opts);
+    case 'cut':
+      return cut(file, job, opts);
+    case 'gif':
+      return toGif(file, job, opts);
+    case 'peaks': {
+      const peaks = await audioPeaks(file, job.count, opts.signal);
+      return { peaks, blob: new Blob([]), filename: '', mimeType: '', size: 0 };
+    }
+    case 'compress':
+    case 'convert':
+    case 'trim':
+    case 'resize':
+    case 'extract-audio':
+    case 'audio-cut':
+    case 'audio-convert':
+      return transcode(file, job, opts);
+    default:
+      throw new EngineError('UNSUPPORTED_OUTPUT', `The "${(job as { op: string }).op}" tool is not available.`);
+  }
+}
+
 scope.addEventListener('message', async (e) => {
   const msg = e.data;
   if (msg.type === 'cancel') {
@@ -47,8 +75,7 @@ scope.addEventListener('message', async (e) => {
     const controller = new AbortController();
     running.set(msg.id, controller);
     try {
-      if (msg.job.op !== 'mute') throw new EngineError('UNSUPPORTED_OUTPUT', `The "${msg.job.op}" tool is not available yet.`);
-      const result = await mute(msg.file, {
+      const result = await dispatch(msg.job, msg.file, {
         signal: controller.signal,
         slowMs: msg.options?.slowMs,
         onProgress: (progress) => scope.postMessage({ type: 'progress', id: msg.id, progress }),
