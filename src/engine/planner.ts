@@ -76,7 +76,8 @@ function missing(caps: PlannerCaps, job: PlannerJob, input: PlannerInput, out: O
   const { encode, decode } = needs(job, input, out);
   return {
     encode: encode.filter((c) => !isPcm(c) && (NEVER_ENCODED.has(c) || !caps.canEncode[c])),
-    decode: decode.filter((c) => !caps.canDecode[c]),
+    // Only codecs the capability probe tested and found missing block a job (PCM needs no decoder).
+    decode: decode.filter((c) => !isPcm(c) && c in caps.canDecode && !caps.canDecode[c]),
   };
 }
 
