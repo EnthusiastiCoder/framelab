@@ -46,6 +46,8 @@ export interface TranscodeJob {
   forceTranscode?: boolean;
   videoBitrate?: number;
   audioBitrate?: number;
+  /** Encode the video at a constant bitrate (target-size compress), so the file lands near the planned size. */
+  constantBitrate?: boolean;
   /** Resize/crop: the region of the input that is used, the output size and where the region lands in it. */
   layout?: { output: { width: number; height: number }; source: CropRect; dest: CropRect };
   /** Fill the padding of a fit layout with a blurred, scaled copy of the frame. */
