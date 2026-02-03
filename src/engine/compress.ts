@@ -38,3 +38,14 @@ export function presetBitrate(preset: Preset, height: number, fps = 30): number 
 
 /** Audio bits per second per preset. */
 export const PRESET_AUDIO: Record<Preset, number> = { small: 96_000, balanced: 128_000, high: 192_000 };
+
+/**
+ * Bits per pixel per frame below which browser H.264 encoders stop following the requested bitrate (measured in
+ * Edge: about 0.8 Mbps at 1080p30 whatever bitrate is asked for). Below it, VP9 keeps to the plan.
+ */
+export const H264_FLOOR_BPP = 0.02;
+
+/** True when `bitrate` is too low for browser H.264 encoders at this size, so VP9 should be used instead. */
+export function belowH264Floor(bitrate: number, width: number, height: number, fps = 30): boolean {
+  return bitrate < width * height * Math.min(60, Math.max(1, fps)) * H264_FLOOR_BPP;
+}
