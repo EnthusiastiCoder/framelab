@@ -11,6 +11,8 @@
         planner: PlannerJob;
         /** Estimated output size in bytes (memory policy). */
         estimate: number;
+        /** A plain-language note about the chosen settings, shown with the file details. */
+        note?: string;
         error?: undefined;
       }
     | { error: string };
@@ -126,7 +128,7 @@
   }
 
   async function onfiles(files: File[]) {
-    if (status === 'unsupported' || status === 'running' || status === 'checking') return;
+    if (status === 'unsupported' || status === 'running') return;
     const f = files[0];
     if (!f) return;
     file = f;
@@ -259,10 +261,15 @@
               : ', no audio'}
           </p>
         </div>
-        <span class="chip" data-testid="engine-chip">{chip}</span>
+        {#if plan}
+          <span class="chip" data-testid="engine-chip">{chip}</span>
+        {/if}
       </div>
       {#if showReason && plan}
         <p class="reason" data-testid="engine-reason">{plan.reason}</p>
+      {/if}
+      {#if built && !built.error && built.note}
+        <p class="hint note">{built.note}</p>
       {/if}
       {#if built?.error}
         <p class="reason" role="alert">{built.error}</p>
@@ -341,6 +348,9 @@
     border-radius: var(--radius-sm);
     background: var(--warning-soft);
     font-size: 0.9rem;
+  }
+  .note {
+    margin-top: var(--space-3);
   }
   .options {
     display: grid;
