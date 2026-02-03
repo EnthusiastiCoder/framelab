@@ -1,6 +1,8 @@
-// E21: every WS2 op passes again with ?engine=ffmpeg (parametrised).
-// Decision 2 (WS0): ffmpeg is an LGPL build without libx264, so the convert case targets WebM (VP9/Opus);
-// MP4/H.264 through ffmpeg depends on an LGPL-compatible H.264 encoder (e.g. OpenH264) and is not asserted here.
+// E21 (adapted, CTO: v1 is WebCodecs-only, no ffmpeg path exists). The user-facing equivalent of "every WS2 op
+// passes again on the fallback engine": with the browser's H.264 and AAC encoders reported as unavailable (as on
+// bundled Chromium), every WS2 op still produces a valid output. Every verify assert is unchanged. The chip assert
+// becomes: video ops say why they fall back to WebM (engine-reason), MP3/FLAC ops show the Compatibility (WASM
+// encoder) chip, and GIF stays on the fast path.
 import { test, expect, type Page } from '@playwright/test';
 import { statSync } from 'node:fs';
 import { FIXTURES, fixture } from '../helpers/fixtures';
@@ -12,8 +14,22 @@ interface Op {
   name: string;
   slug: string;
   input: string;
+  /** What the page must say about the engine: a WebM fallback reason, the WASM chip, or the fast chip. */
+  engine: 'webm-reason' | 'compatibility' | 'fast';
   setup: (page: Page) => Promise<void>;
   verify: (out: string) => Promise<void>;
+}
+
+/** Makes the page report no H.264 and no AAC encoder, like bundled Chromium. */
+function noH264NorAac() {
+  const patch = (ctor: any, blocked: RegExp) => {
+    if (!ctor?.isConfigSupported) return;
+    const original = ctor.isConfigSupported.bind(ctor);
+    ctor.isConfigSupported = async (config: { codec: string }) =>
+      blocked.test(config.codec) ? { supported: false, config } : original(config);
+  };
+  patch((window as any).VideoEncoder, /^(avc1|avc3)/);
+  patch((window as any).AudioEncoder, /^mp4a/);
 }
 
 const near = (a: number, b: number, tol: number) => expect(Math.abs(a - b)).toBeLessThanOrEqual(tol);
@@ -21,6 +37,7 @@ const near = (a: number, b: number, tol: number) => expect(Math.abs(a - b)).toBe
 const ops: Op[] = [
   {
     name: 'compress (Small)',
+    engine: 'webm-reason',
     slug: 'compress-video',
     input: FIXTURES.hd1080,
     setup: (p) => radio(p, 'Small'),
@@ -32,6 +49,7 @@ const ops: Op[] = [
   },
   {
     name: 'convert mp4 -> webm',
+    engine: 'fast',
     slug: 'convert-video',
     input: FIXTURES.h264,
     setup: (p) => selectByLabel(p, 'Output format', 'WebM'),
@@ -44,6 +62,7 @@ const ops: Op[] = [
   },
   {
     name: 'trim exact',
+    engine: 'webm-reason',
     slug: 'trim-video',
     input: FIXTURES.h264,
     setup: async (p) => {
@@ -54,6 +73,7 @@ const ops: Op[] = [
   },
   {
     name: 'cut',
+    engine: 'webm-reason',
     slug: 'cut-video',
     input: FIXTURES.h264,
     setup: (p) => addRemovedSections(p, [[1, 2]]),
@@ -61,6 +81,7 @@ const ops: Op[] = [
   },
   {
     name: 'gif',
+    engine: 'fast',
     slug: 'video-to-gif',
     input: FIXTURES.h264,
     setup: async (p) => {
@@ -77,6 +98,7 @@ const ops: Op[] = [
   },
   {
     name: 'extract audio mp3',
+    engine: 'compatibility',
     slug: 'extract-audio',
     input: FIXTURES.h264,
     setup: (p) => selectByLabel(p, 'Format', 'MP3'),
@@ -89,6 +111,7 @@ const ops: Op[] = [
   },
   {
     name: 'resize 9:16 crop',
+    engine: 'webm-reason',
     slug: 'resize-video',
     input: FIXTURES.hd1080,
     setup: async (p) => {
@@ -103,6 +126,7 @@ const ops: Op[] = [
   },
   {
     name: 'audio cutter',
+    engine: 'compatibility',
     slug: 'audio-cutter',
     input: FIXTURES.toneMp3,
     setup: async (p) => {
@@ -113,6 +137,7 @@ const ops: Op[] = [
   },
   {
     name: 'audio converter flac',
+    engine: 'compatibility',
     slug: 'audio-converter',
     input: FIXTURES.toneWav,
     setup: (p) => selectByLabel(p, 'Format', 'FLAC'),
@@ -121,11 +146,18 @@ const ops: Op[] = [
 ];
 
 for (const op of ops) {
-  test(`E21 ${op.name} with ?engine=ffmpeg`, async ({ page }, info) => {
-    await openTool(page, op.slug, '?engine=ffmpeg');
+  test(`E21 ${op.name} without H.264/AAC encoders`, async ({ page }, info) => {
+    await page.addInitScript(noH264NorAac);
+    await openTool(page, op.slug);
     await loadFile(page, op.input);
     await op.setup(page);
-    expect(await engineChip(page)).toContain('Compatibility (ffmpeg)');
+    if (op.engine === 'webm-reason') {
+      await expect(page.getByTestId('engine-reason')).toContainText('WebM');
+    } else if (op.engine === 'compatibility') {
+      expect(await engineChip(page)).toContain('Compatibility');
+    } else {
+      expect(await engineChip(page)).toContain('Fast (WebCodecs)');
+    }
     await op.verify(await runAndDownload(page, info.outputPath('out')));
   });
 }
