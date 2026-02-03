@@ -11,6 +11,7 @@ import {
   OggOutputFormat,
   Output,
   QUALITY_HIGH,
+  Quality,
   WavOutputFormat,
   WebMOutputFormat,
   type AudioCodec,
@@ -159,7 +160,11 @@ function videoOptions(job: TranscodeJob): ConversionVideoOptions {
   if (!videoCodec) return { discard: true };
   const opts: ConversionVideoOptions = {
     codec: videoCodec as VideoCodec,
-    bitrate: job.videoBitrate ?? QUALITY_HIGH,
+    bitrate: job.videoBitrate
+      ? job.constantBitrate
+        ? new Quality({ bitrate: job.videoBitrate, bitrateMode: 'constant' })
+        : job.videoBitrate
+      : QUALITY_HIGH,
     forceTranscode: !!job.forceTranscode,
   };
   const layout = job.layout;
