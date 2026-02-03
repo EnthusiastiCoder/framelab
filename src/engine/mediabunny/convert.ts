@@ -158,15 +158,17 @@ function fitProcess(layout: NonNullable<TranscodeJob['layout']>, blur: boolean) 
 function videoOptions(job: TranscodeJob): ConversionVideoOptions {
   const { videoCodec } = job.output;
   if (!videoCodec) return { discard: true };
+  // A bitrate (or quality) forces a re-encode in mediabunny, so it is only set when the job asks for one; streams
+  // that already match are then copied, and re-encoded ones use mediabunny's default (high) quality.
   const opts: ConversionVideoOptions = {
     codec: videoCodec as VideoCodec,
-    bitrate: job.videoBitrate
-      ? job.constantBitrate
-        ? new Quality({ bitrate: job.videoBitrate, bitrateMode: 'constant' })
-        : job.videoBitrate
-      : QUALITY_HIGH,
     forceTranscode: !!job.forceTranscode,
   };
+  if (job.videoBitrate) {
+    opts.bitrate = job.constantBitrate ? new Quality({ bitrate: job.videoBitrate, bitrateMode: 'constant' }) : job.videoBitrate;
+  } else if (job.forceTranscode) {
+    opts.bitrate = QUALITY_HIGH;
+  }
   const layout = job.layout;
   if (layout) {
     const fills =
@@ -197,7 +199,6 @@ function audioOptions(job: TranscodeJob): ConversionAudioOptions {
     forceTranscode: !!job.forceTranscode || !!fade,
   };
   if (job.audioBitrate) opts.bitrate = job.audioBitrate;
-  else if (!audioCodec.startsWith('pcm') && audioCodec !== 'flac') opts.bitrate = QUALITY_HIGH;
   if (fade) {
     const duration = job.trim ? job.trim.end - job.trim.start : Infinity;
     opts.process = (sample) => fadeAudio(sample, fade, 0, duration);
@@ -229,7 +230,14 @@ export async function transcode(file: File, job: TranscodeJob, opts: RunOptions 
       input,
       output,
       video: videoOptions(job),
-      audio: audioOptions(job),
+      audio: (track) => {
+        const opts = audioOptions(job);
+        // MP3 below 32 kHz is MPEG-2, which tops out at 160 kbps: resample so a higher bitrate is honoured.
+        if (job.output.audioCodec === 'mp3' && (job.audioBitrate ?? 0) > 160_000 && track.sampleRate < 32_000) {
+          opts.sampleRate = 44_100;
+        }
+        return opts;
+      },
       trim,
       // Fast trim copies packets and snaps to the previous keyframe; exact trim and compress always re-encode.
       copy: job.copyOnly
@@ -239,8 +247,17 @@ export async function transcode(file: File, job: TranscodeJob, opts: RunOptions 
           : {},
       showWarnings: false,
     });
-    if (!conversion.isValid) {
-      const why = conversion.discardedTracks.map((t) => `${t.track.type}: ${t.reason.replace(/_/g, ' ')}`).join('; ');
+    // A track the job wants but mediabunny had to drop (e.g. an encoder refused the bitrate) is an error, not a
+    // silently missing stream.
+    const kept = (type: string) => conversion.utilizedTracks.some((t) => t.type === type);
+    const lost = conversion.discardedTracks.filter(
+      (t) =>
+        t.reason !== 'discarded_by_user' &&
+        !kept(t.track.type) &&
+        (t.track.type === 'video' ? !!job.output.videoCodec : t.track.type === 'audio' && !!job.output.audioCodec),
+    );
+    if (!conversion.isValid || lost.length > 0) {
+      const why = (lost.length ? lost : conversion.discardedTracks).map((t) => `${t.track.type}: ${t.reason.replace(/_/g, ' ')}`).join('; ');
       throw new EngineError('UNSUPPORTED_OUTPUT', `This file cannot be written as ${ext.toUpperCase()} here (${why || 'no usable track'}).`);
     }
     onProgress?.({ phase: 'processing', ratio: 0.05 });
