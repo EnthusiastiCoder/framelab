@@ -7,6 +7,10 @@ export interface ToolEntry {
   blurb: string;
   op: string;
   accepts: string;
+  /** The island that renders the tool (see src/pages/[slug].astro). */
+  island: string;
+  /** Options a variant page preselects, passed to the island as props. */
+  preset?: Record<string, string>;
   load: () => Promise<unknown>;
 }
 
@@ -17,6 +21,7 @@ export const tools: ToolEntry[] = [
     blurb: 'Remove the sound from a video without re-encoding it.',
     op: 'mute',
     accepts: 'video/*',
+    island: 'MuteVideo',
     load: () => import('../components/tools/MuteVideo.svelte'),
   },
 ];
