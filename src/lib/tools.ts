@@ -24,6 +24,15 @@ export const tools: ToolEntry[] = [
     island: 'MuteVideo',
     load: () => import('../components/tools/MuteVideo.svelte'),
   },
+  {
+    slug: 'compress-video',
+    title: 'Compress video',
+    blurb: 'Make a video smaller with a quality preset or a target size.',
+    op: 'compress',
+    accepts: 'video/*',
+    island: 'Compress',
+    load: () => import('../components/tools/Compress.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
