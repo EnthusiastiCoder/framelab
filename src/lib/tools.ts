@@ -42,6 +42,15 @@ export const tools: ToolEntry[] = [
     island: 'Convert',
     load: () => import('../components/tools/Convert.svelte'),
   },
+  {
+    slug: 'trim-video',
+    title: 'Trim video',
+    blurb: 'Keep just the part you want, frame-exact or instantly.',
+    op: 'trim',
+    accepts: 'video/*',
+    island: 'Trim',
+    load: () => import('../components/tools/Trim.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
