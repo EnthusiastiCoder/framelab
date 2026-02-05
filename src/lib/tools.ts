@@ -33,6 +33,15 @@ export const tools: ToolEntry[] = [
     island: 'Compress',
     load: () => import('../components/tools/Compress.svelte'),
   },
+  {
+    slug: 'convert-video',
+    title: 'Convert video',
+    blurb: 'Turn MOV, WebM or MKV into MP4, or MP4 into WebM.',
+    op: 'convert',
+    accepts: 'video/*',
+    island: 'Convert',
+    load: () => import('../components/tools/Convert.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
