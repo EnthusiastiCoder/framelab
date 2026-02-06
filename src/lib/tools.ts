@@ -60,6 +60,15 @@ export const tools: ToolEntry[] = [
     island: 'Cut',
     load: () => import('../components/tools/Cut.svelte'),
   },
+  {
+    slug: 'video-to-gif',
+    title: 'Video to GIF',
+    blurb: 'Turn a short clip into a looping GIF.',
+    op: 'gif',
+    accepts: 'video/*',
+    island: 'ToGif',
+    load: () => import('../components/tools/ToGif.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
