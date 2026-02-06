@@ -51,6 +51,15 @@ export const tools: ToolEntry[] = [
     island: 'Trim',
     load: () => import('../components/tools/Trim.svelte'),
   },
+  {
+    slug: 'cut-video',
+    title: 'Cut video',
+    blurb: 'Remove sections from a video and keep the rest in sync.',
+    op: 'cut',
+    accepts: 'video/*',
+    island: 'Cut',
+    load: () => import('../components/tools/Cut.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
