@@ -69,6 +69,15 @@ export const tools: ToolEntry[] = [
     island: 'ToGif',
     load: () => import('../components/tools/ToGif.svelte'),
   },
+  {
+    slug: 'extract-audio',
+    title: 'Extract audio',
+    blurb: 'Save the sound of a video as MP3, M4A, WAV or Opus.',
+    op: 'extract-audio',
+    accepts: 'video/*',
+    island: 'ExtractAudio',
+    load: () => import('../components/tools/ExtractAudio.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
