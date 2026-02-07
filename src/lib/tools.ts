@@ -78,6 +78,15 @@ export const tools: ToolEntry[] = [
     island: 'ExtractAudio',
     load: () => import('../components/tools/ExtractAudio.svelte'),
   },
+  {
+    slug: 'resize-video',
+    title: 'Resize video',
+    blurb: 'Reframe a video to 9:16, 1:1, 4:5 or 16:9.',
+    op: 'resize',
+    accepts: 'video/*',
+    island: 'ResizeCrop',
+    load: () => import('../components/tools/ResizeCrop.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
