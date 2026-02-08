@@ -87,6 +87,15 @@ export const tools: ToolEntry[] = [
     island: 'ResizeCrop',
     load: () => import('../components/tools/ResizeCrop.svelte'),
   },
+  {
+    slug: 'audio-cutter',
+    title: 'Audio cutter',
+    blurb: 'Cut a piece out of an audio file, with fades.',
+    op: 'audio-cut',
+    accepts: 'audio/*',
+    island: 'AudioCutter',
+    load: () => import('../components/tools/AudioCutter.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
