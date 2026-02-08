@@ -96,6 +96,15 @@ export const tools: ToolEntry[] = [
     island: 'AudioCutter',
     load: () => import('../components/tools/AudioCutter.svelte'),
   },
+  {
+    slug: 'audio-converter',
+    title: 'Audio converter',
+    blurb: 'Convert audio to MP3, M4A, WAV, Opus or FLAC.',
+    op: 'audio-convert',
+    accepts: 'audio/*',
+    island: 'AudioConverter',
+    load: () => import('../components/tools/AudioConverter.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
