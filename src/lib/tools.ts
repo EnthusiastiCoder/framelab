@@ -115,6 +115,16 @@ export const tools: ToolEntry[] = [
     preset: { format: 'mp4' },
     load: () => import('../components/tools/Convert.svelte'),
   },
+  {
+    slug: 'webm-to-mp4',
+    title: 'WebM to MP4',
+    blurb: 'Turn a WebM into an MP4 that plays everywhere.',
+    op: 'convert',
+    accepts: 'video/*',
+    island: 'Convert',
+    preset: { format: 'mp4' },
+    load: () => import('../components/tools/Convert.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
