@@ -105,6 +105,16 @@ export const tools: ToolEntry[] = [
     island: 'AudioConverter',
     load: () => import('../components/tools/AudioConverter.svelte'),
   },
+  {
+    slug: 'mov-to-mp4',
+    title: 'MOV to MP4',
+    blurb: 'Turn an iPhone or QuickTime MOV into an MP4.',
+    op: 'convert',
+    accepts: 'video/*',
+    island: 'Convert',
+    preset: { format: 'mp4' },
+    load: () => import('../components/tools/Convert.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
