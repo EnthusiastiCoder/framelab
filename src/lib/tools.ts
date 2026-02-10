@@ -145,6 +145,16 @@ export const tools: ToolEntry[] = [
     preset: { format: 'mp3' },
     load: () => import('../components/tools/ExtractAudio.svelte'),
   },
+  {
+    slug: 'crop-video',
+    title: 'Crop video',
+    blurb: 'Crop a video to any area or a fixed ratio.',
+    op: 'resize',
+    accepts: 'video/*',
+    island: 'ResizeCrop',
+    preset: { aspect: '1:1', mode: 'crop' },
+    load: () => import('../components/tools/ResizeCrop.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
