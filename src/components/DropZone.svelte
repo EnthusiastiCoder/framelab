@@ -39,11 +39,11 @@
   }
 </script>
 
+<div class="dropzone-root" data-testid="dropzone">
 <div
   class="dropzone"
   class:dragging
   class:disabled
-  data-testid="dropzone"
   role="button"
   tabindex="0"
   aria-disabled={disabled}
@@ -62,23 +62,27 @@
   >
   <span class="label">{label}</span>
   <span class="hint">{hint}</span>
-  <input
-    bind:this={input}
-    type="file"
-    {accept}
-    {multiple}
-    tabindex="-1"
-    aria-hidden="true"
-    class="visually-hidden"
-    onclick={(e) => e.stopPropagation()}
-    onchange={(e) => {
-      take((e.currentTarget as HTMLInputElement).files);
-      (e.currentTarget as HTMLInputElement).value = '';
-    }}
-  />
+</div>
+<input
+  bind:this={input}
+  type="file"
+  {accept}
+  {multiple}
+  tabindex="-1"
+  aria-hidden="true"
+  class="visually-hidden"
+  onclick={(e) => e.stopPropagation()}
+  onchange={(e) => {
+    take((e.currentTarget as HTMLInputElement).files);
+    (e.currentTarget as HTMLInputElement).value = '';
+  }}
+/>
 </div>
 
 <style>
+  .dropzone-root {
+    position: relative;
+  }
   .dropzone {
     display: flex;
     flex-direction: column;
