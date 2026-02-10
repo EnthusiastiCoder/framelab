@@ -1,9 +1,19 @@
 ---
 // One landing page per tool. The registry (src/lib/tools.ts) and the content collection must match exactly.
+// Each registry entry names its island; variant pages pass their preset options to it as props.
 import { getCollection, render } from 'astro:content';
 import ToolPage from '../layouts/ToolPage.astro';
 import MuteVideo from '../components/tools/MuteVideo.svelte';
-import { tools } from '../lib/tools';
+import Compress from '../components/tools/Compress.svelte';
+import Convert from '../components/tools/Convert.svelte';
+import Trim from '../components/tools/Trim.svelte';
+import Cut from '../components/tools/Cut.svelte';
+import ToGif from '../components/tools/ToGif.svelte';
+import ExtractAudio from '../components/tools/ExtractAudio.svelte';
+import ResizeCrop from '../components/tools/ResizeCrop.svelte';
+import AudioCutter from '../components/tools/AudioCutter.svelte';
+import AudioConverter from '../components/tools/AudioConverter.svelte';
+import { tools, toolBySlug } from '../lib/tools';
 
 export async function getStaticPaths() {
   const entries = await getCollection('tools');
@@ -17,10 +27,21 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const slug = entry.id;
+const tool = toolBySlug(entry.id)!;
+const island = tool.island;
+const preset = tool.preset ?? {};
 ---
 
 <ToolPage {...entry.data}>
-  {slug === 'mute-video' && <MuteVideo client:load />}
+  {island === 'MuteVideo' && <MuteVideo client:load />}
+  {island === 'Compress' && <Compress client:load />}
+  {island === 'Convert' && <Convert client:load {...preset} />}
+  {island === 'Trim' && <Trim client:load />}
+  {island === 'Cut' && <Cut client:load />}
+  {island === 'ToGif' && <ToGif client:load />}
+  {island === 'ExtractAudio' && <ExtractAudio client:load {...preset} />}
+  {island === 'ResizeCrop' && <ResizeCrop client:load {...preset} />}
+  {island === 'AudioCutter' && <AudioCutter client:load />}
+  {island === 'AudioConverter' && <AudioConverter client:load />}
   <Content slot="body" />
 </ToolPage>
