@@ -135,6 +135,16 @@ export const tools: ToolEntry[] = [
     preset: { format: 'webm' },
     load: () => import('../components/tools/Convert.svelte'),
   },
+  {
+    slug: 'video-to-mp3',
+    title: 'Video to MP3',
+    blurb: 'Save the soundtrack of a video as an MP3.',
+    op: 'extract-audio',
+    accepts: 'video/*',
+    island: 'ExtractAudio',
+    preset: { format: 'mp3' },
+    load: () => import('../components/tools/ExtractAudio.svelte'),
+  },
 ];
 
 export function toolBySlug(slug: string): ToolEntry | undefined {
