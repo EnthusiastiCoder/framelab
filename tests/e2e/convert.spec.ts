@@ -50,19 +50,28 @@ test.describe('convert video', () => {
   });
 
   test('E20 MP4 on bundled Chromium succeeds via ffmpeg or offers WebM with a reason @cross', async ({ page }, info) => {
-    test.skip(info.project.name !== 'chromium', 'bundled Chromium only (no H.264/AAC encoders)');
+    test.skip(info.project.name !== 'chromium', 'bundled Chromium only (H.264/AAC encoder may or may not exist)');
     await openTool(page, 'convert-video');
     await loadFile(page, FIXTURES.vp9);
     await selectByLabel(page, 'Output format', 'MP4');
-    const reason = page.getByTestId('engine-reason');
-    await expect(reason).toBeVisible();
-    expect((await reason.innerText()).trim().length).toBeGreaterThan(5);
     const chip = await engineChip(page);
-    if (chip.includes('Compatibility')) {
+    const reason = page.getByTestId('engine-reason');
+    if (chip.includes('Fast')) {
+      // The browser can encode H.264/AAC: a real conversion must succeed and verify.
+      const p = await probe(await runAndDownload(page, info.outputPath('out')));
+      expect(p.mimeType).toContain('video/mp4');
+      expect(p.videoCodec).toBe('avc');
+      expect(p.audioCodec).toBe('aac');
+      expect(Math.abs(p.duration - 5)).toBeLessThanOrEqual(0.1);
+    } else if (chip.includes('Compatibility')) {
+      await expect(reason).toBeVisible();
+      expect((await reason.innerText()).trim().length).toBeGreaterThan(5);
       const p = await probe(await runAndDownload(page, info.outputPath('out')));
       expect(p.mimeType).toContain('video/mp4');
       expect(Math.abs(p.duration - 5)).toBeLessThanOrEqual(0.1);
     } else {
+      await expect(reason).toBeVisible();
+      expect((await reason.innerText()).trim().length).toBeGreaterThan(5);
       await expect(reason).toContainText('WebM');
     }
   });
