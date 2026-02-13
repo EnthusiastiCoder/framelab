@@ -21,8 +21,8 @@ export const DEFAULT_STYLE: CaptionStyle = {
   outline: 0.08,
 };
 
-/** The font stack the burner draws with (Inter is self-hosted when available). */
-export const CAPTION_FONT_FAMILY = 'Inter, "Segoe UI", Roboto, Arial, sans-serif';
+/** The font stack the burner draws with (system fonts: nothing is downloaded). */
+export const CAPTION_FONT_FAMILY = 'system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 export const LINE_HEIGHT = 1.25;
 /** The text must fit within this fraction of the frame width. */
 export const SAFE_WIDTH = 0.9;
