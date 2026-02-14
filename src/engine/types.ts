@@ -81,7 +81,16 @@ export interface PeaksJob {
   count: number;
 }
 
-export type Job = MuteJob | TranscodeJob | CutJob | GifJob | PeaksJob;
+/** Burn subtitles into the video: re-encodes every frame with the active cue drawn on it. */
+export interface BurnJob {
+  op: 'burn';
+  output: OutputSpec;
+  cues: import('../subtitles/cue').Cue[];
+  style: import('../subtitles/style').CaptionStyle;
+  videoBitrate?: number;
+}
+
+export type Job = MuteJob | TranscodeJob | CutJob | GifJob | PeaksJob | BurnJob;
 
 export interface Progress {
   phase: 'reading' | 'processing' | 'writing' | 'done';
