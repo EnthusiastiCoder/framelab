@@ -7,6 +7,7 @@ import { mute, transcode, type RunOptions } from './mediabunny/convert';
 import { cut } from './mediabunny/ranges';
 import { toGif } from './mediabunny/gif';
 import { audioPeaks } from './mediabunny/audio';
+import { burnSubtitles } from '../subtitles/burn';
 
 export type WorkerRequest =
   | { type: 'probe'; id: number; file: File }
@@ -40,6 +41,8 @@ async function dispatch(job: Job, file: File, opts: RunOptions): Promise<Result>
       return cut(file, job, opts);
     case 'gif':
       return toGif(file, job, opts);
+    case 'burn':
+      return burnSubtitles(file, job, opts);
     case 'peaks': {
       const peaks = await audioPeaks(file, job.count, opts.signal);
       return { peaks, blob: new Blob([]), filename: '', mimeType: '', size: 0 };
