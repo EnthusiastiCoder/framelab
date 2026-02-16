@@ -155,9 +155,11 @@ async function loadModel(model: WhisperModel, onProgress: (phase: AsrPhase, r: n
   env.useBrowserCache = true;
   env.remoteHost = `${scope.location.origin}${MODEL_BASE}`;
   env.remotePathTemplate = '{model}/{revision}/';
-  const onnx = env.backends.onnx as { wasm?: { wasmPaths?: string; numThreads?: number; proxy?: boolean } };
+  const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown; numThreads?: number; proxy?: boolean } };
   if (onnx.wasm) {
-    onnx.wasm.wasmPaths = '/vendor/ort/';
+    // transformers.js points wasmPaths at a CDN by default. Clearing it makes onnxruntime-web load the
+    // runtime .wasm that Vite emits next to this chunk (dist/_astro/), on our own origin.
+    onnx.wasm.wasmPaths = undefined;
     onnx.wasm.proxy = false;
     if (!scope.crossOriginIsolated) onnx.wasm.numThreads = 1;
   }
