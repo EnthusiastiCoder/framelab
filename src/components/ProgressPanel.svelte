@@ -5,9 +5,11 @@
   interface Props {
     progress: Progress | null;
     oncancel: () => void;
+    /** Overrides the phase text (e.g. "Downloading the speech model"). */
+    label?: string;
   }
 
-  let { progress, oncancel }: Props = $props();
+  let { progress, oncancel, label }: Props = $props();
 
   const PHASE: Record<Progress['phase'], string> = {
     reading: 'Reading your file',
@@ -24,7 +26,7 @@
 
 <div class="progress card" data-testid="progress" role="status" aria-live="polite">
   <div class="row">
-    <span class="phase">{PHASE[progress?.phase ?? 'reading']}</span>
+    <span class="phase">{label ?? PHASE[progress?.phase ?? 'reading']}</span>
     <span class="pct">{percent}%{eta ? ` · ${eta}` : ''}</span>
   </div>
   <div class="bar" role="progressbar" aria-label="Job progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow={percent}>
