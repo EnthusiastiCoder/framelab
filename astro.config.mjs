@@ -1,6 +1,7 @@
 // Framelab: static Astro site with Svelte islands. Every page is prerendered into dist/.
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
+import stripRemoteUrls from './scripts/vite-strip-remote-urls.mjs';
 
 export default defineConfig({
   output: 'static',
@@ -11,6 +12,7 @@ export default defineConfig({
   vite: {
     // Never inline scripts or assets: the CSP allows only same-origin scripts plus the hashed island bootstrap.
     build: { assetsInlineLimit: 0 },
-    worker: { format: 'es' },
+    worker: { format: 'es', plugins: () => [stripRemoteUrls()] },
+    plugins: [stripRemoteUrls()],
   },
 });
