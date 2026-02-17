@@ -10,7 +10,6 @@ import {
   VideoSampleSink,
   VideoSampleSource,
   type AudioCodec,
-  type VideoSample,
   type VideoCodec,
 } from 'mediabunny';
 import { EngineError, type CutJob, type Result } from '../types';
@@ -21,16 +20,7 @@ import { sliceAudio } from './audio';
 import { abortableDelay, cancelled, outputFormatFor, type RunOptions } from './convert';
 import { ensureEncoder } from './encoders';
 
-/**
- * Optional per-frame hook (burn-in): receives each re-timed frame and returns the frame to encode (a new sample,
- * which cut closes after encoding, or the same one). A hooked output is written upright (rotation 0), so the hook
- * must return display-oriented frames.
- */
-export interface FrameHook {
-  frame: (sample: VideoSample) => VideoSample | Promise<VideoSample>;
-}
-
-export async function cut(file: File, job: CutJob, opts: RunOptions = {}, hook?: FrameHook): Promise<Result> {
+export async function cut(file: File, job: CutJob, opts: RunOptions = {}): Promise<Result> {
   const { onProgress, signal, slowMs } = opts;
   if (slowMs && slowMs > 0) {
     await abortableDelay(slowMs, signal, (r) => onProgress?.({ phase: 'reading', ratio: r * 0.1 }));
@@ -59,7 +49,7 @@ export async function cut(file: File, job: CutJob, opts: RunOptions = {}, hook?:
       });
       const stats = await videoTrack.computePacketStats(60).catch(() => null);
       output.addVideoTrack(videoSource, {
-        rotation: hook ? 0 : videoTrack.rotation,
+        rotation: videoTrack.rotation,
         ...(stats?.averagePacketRate ? { frameRate: Math.round(stats.averagePacketRate) } : {}),
       });
     }
@@ -90,16 +80,7 @@ export async function cut(file: File, job: CutJob, opts: RunOptions = {}, hook?:
             if (end <= start) continue;
             sample.setTimestamp(offset + (start - a));
             sample.setDuration(end - start);
-            if (hook) {
-              const drawn = await hook.frame(sample);
-              try {
-                await videoSource.add(drawn);
-              } finally {
-                if (drawn !== sample) drawn.close();
-              }
-            } else {
-              await videoSource.add(sample);
-            }
+            await videoSource.add(sample);
             videoDone = offset + (end - a);
             report();
           } finally {
