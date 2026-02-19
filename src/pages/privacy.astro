@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import DeleteModels from '../components/DeleteModels.svelte';
 ---
 
 <Base
@@ -20,6 +21,9 @@ import Base from '../layouts/Base.astro';
     <p>Every tool shows a badge counting requests to other sites; it stays at zero. You can also open your browser's developer tools and look at the network tab while you work.</p>
     <h2>What the site stores</h2>
     <p>Nothing about you. Your browser may cache the site's own files so it loads faster next time.</p>
+    <h2>Speech models</h2>
+    <p>Auto subtitles runs a speech model in your browser. It downloads from this site only after you confirm its size, and your audio never leaves this device. The model stays in your browser's storage so the next run needs no download. You can remove every downloaded model here:</p>
+    <DeleteModels client:load />
   </article>
 </Base>
 
