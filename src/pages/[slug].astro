@@ -13,6 +13,8 @@ import ExtractAudio from '../components/tools/ExtractAudio.svelte';
 import ResizeCrop from '../components/tools/ResizeCrop.svelte';
 import AudioCutter from '../components/tools/AudioCutter.svelte';
 import AudioConverter from '../components/tools/AudioConverter.svelte';
+import AutoSubtitles from '../components/tools/AutoSubtitles.svelte';
+import BurnSubtitles from '../components/tools/BurnSubtitles.svelte';
 import { tools, toolBySlug } from '../lib/tools';
 
 export async function getStaticPaths() {
@@ -43,5 +45,7 @@ const preset = tool.preset ?? {};
   {island === 'ResizeCrop' && <ResizeCrop client:load {...preset} />}
   {island === 'AudioCutter' && <AudioCutter client:load />}
   {island === 'AudioConverter' && <AudioConverter client:load />}
+  {island === 'AutoSubtitles' && <AutoSubtitles client:load />}
+  {island === 'BurnSubtitles' && <BurnSubtitles client:load />}
   <Content slot="body" />
 </ToolPage>
