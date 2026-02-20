@@ -13,6 +13,10 @@ Each licence was checked against the `LICENSE` file in the installed package. Th
 | gifenc | 1.0.3 | MIT | https://github.com/mattdesl/gifenc | engine worker, loaded only for GIF output |
 | svelte | 5.59.1 | MIT | https://github.com/sveltejs/svelte | tool islands (runtime) |
 | astro | 5.18.2 | MIT | https://github.com/withastro/astro | island loader script |
+| @huggingface/transformers | 3.8.1 | Apache-2.0 | https://github.com/huggingface/transformers.js/tree/3.8.1 | speech recognition worker, loaded only by auto-subtitles |
+| @huggingface/jinja | 0.5.13 | MIT | https://github.com/huggingface/huggingface.js/tree/main/packages/jinja | bundled inside transformers.js |
+| onnxruntime-web | 1.22.0-dev.20250409-89f8206ba4 | MIT | https://github.com/microsoft/onnxruntime | speech recognition worker (WebAssembly runtime `ort-wasm-simd-threaded.jsep.wasm`) |
+| onnxruntime-common | 1.21.0 | MIT | https://github.com/microsoft/onnxruntime | bundled inside transformers.js |
 
 Notes:
 - mediabunny (MPL-2.0) is used unmodified. Its licence header is kept in the built worker file, and its source is
@@ -39,6 +43,27 @@ Notes:
 - @mediabunny/flac-encoder contains a WebAssembly build of libFLAC (BSD-3-Clause, © Xiph.Org Foundation); its
   licence text is in `node_modules/@mediabunny/flac-encoder/licenses/libflac/`.
 - No ffmpeg build and no GPL code ship with Framelab. Video encoding uses the browser's own WebCodecs encoders.
+- @huggingface/transformers is licensed under the Apache License 2.0; the full text is in
+  [`licenses/Apache-2.0.txt`](licenses/Apache-2.0.txt) (copied from the package's `LICENSE`) and on the `/licenses`
+  page. The package has no NOTICE file. **Build-time change:** `scripts/vite-strip-remote-urls.mjs` removes the
+  `http://` / `https://` prefix from the absolute URLs inside the transformers.js and onnxruntime-web sources (default
+  hosts, documentation links in error messages and licence headers), so the built site names no third-party host.
+  No program logic is changed; Framelab overrides those defaults at run time (models load from its own `/models/`, and
+  the WebAssembly runtime from its own `/_astro/`).
+
+## Downloaded on demand from this site (not in dist/)
+
+The auto-subtitles tool downloads one speech model, only after the user confirms its size. The files are
+mirrored from the pinned revisions below by `scripts/fetch-models.mjs` and served from Framelab's own origin
+under `/models/` (files over 24 MiB in `.partN` chunks).
+
+| Model | Revision | Licence | Source |
+|---|---|---|---|
+| Whisper tiny (ONNX, q8) | ff4177021cc41f7db950912b73ea4fdf7d01d8e7 | MIT (OpenAI Whisper weights) | https://huggingface.co/onnx-community/whisper-tiny , converted from https://huggingface.co/openai/whisper-tiny |
+| Whisper base (ONNX, q8) | 27a07b4b52b3a4c5886134bb4320e93e1a4bbc7c | MIT (OpenAI Whisper weights); the conversion's model card says Apache-2.0 | https://huggingface.co/onnx-community/whisper-base , converted from https://huggingface.co/openai/whisper-base |
+| Whisper small (ONNX, q8) | 36050c46d777d46dc4b5f43f6d90574fc38f8732 | MIT (OpenAI Whisper weights) | https://huggingface.co/onnx-community/whisper-small , converted from https://huggingface.co/openai/whisper-small |
+
+The Whisper code and model weights were released by OpenAI under the MIT licence: https://github.com/openai/whisper/blob/main/LICENSE .
 
 ## Build and test tools (not shipped)
 
