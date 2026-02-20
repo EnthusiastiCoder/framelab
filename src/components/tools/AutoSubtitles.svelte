@@ -221,14 +221,15 @@
 
   {#if status === 'empty' || status === 'probing' || status === 'ready'}
     <div class="options card">
-      <label class="field">
-        Model
+      <div class="field">
+        <!-- A separate label keeps the select's accessible name exactly "Model" (not "Model" + the chosen option). -->
+        <label for="model-select">Model</label>
         <select id="model-select" data-testid="model-select" bind:value={modelId}>
           {#each MODELS as m (m.id)}
             <option value={m.id}>{m.label}</option>
           {/each}
         </select>
-      </label>
+      </div>
       <p class="hint">Smaller models are faster; larger ones make fewer mistakes. A model downloads once, then stays in this browser.</p>
     </div>
     <button type="button" class="btn run" data-testid="run" disabled={status !== 'ready'} onclick={generate}>Generate subtitles</button>
