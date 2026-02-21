@@ -3,6 +3,8 @@
 import Base from '../layouts/Base.astro';
 // The full LGPL text that covers LAME, kept once in the repo and rendered here verbatim.
 import lgplText from '../../licenses/LGPL-2.0.txt?raw';
+// The Apache-2.0 text that covers transformers.js.
+import apacheText from '../../licenses/Apache-2.0.txt?raw';
 
 const shipped = [
   {
@@ -53,12 +55,42 @@ const shipped = [
     source: 'https://github.com/withastro/astro',
     licenseUrl: 'https://opensource.org/license/mit',
   },
+  {
+    name: 'Transformers.js',
+    version: '3.8.1',
+    license: 'Apache-2.0',
+    use: 'Runs the Whisper speech model for auto subtitles, loaded only by that tool.',
+    source: 'https://github.com/huggingface/transformers.js/tree/3.8.1',
+    licenseUrl: '#apache-2.0',
+  },
+  {
+    name: 'Jinja (Hugging Face)',
+    version: '0.5.13',
+    license: 'MIT',
+    use: 'Template engine bundled inside Transformers.js.',
+    source: 'https://github.com/huggingface/huggingface.js/tree/main/packages/jinja',
+    licenseUrl: 'https://opensource.org/license/mit',
+  },
+  {
+    name: 'ONNX Runtime Web',
+    version: '1.22.0-dev',
+    license: 'MIT',
+    use: 'The WebAssembly runtime that executes the speech model on your device.',
+    source: 'https://github.com/microsoft/onnxruntime',
+    licenseUrl: 'https://opensource.org/license/mit',
+  },
+];
+
+const models = [
+  { name: 'Whisper tiny', revision: 'ff4177021cc41f7db950912b73ea4fdf7d01d8e7', source: 'https://huggingface.co/onnx-community/whisper-tiny' },
+  { name: 'Whisper base', revision: '27a07b4b52b3a4c5886134bb4320e93e1a4bbc7c', source: 'https://huggingface.co/onnx-community/whisper-base' },
+  { name: 'Whisper small', revision: '36050c46d777d46dc4b5f43f6d90574fc38f8732', source: 'https://huggingface.co/onnx-community/whisper-small' },
 ];
 ---
 
 <Base
   title="Licences | Framelab"
-  description="The open-source software Framelab ships in your browser, with each licence and a link to its source code. Mediabunny is MPL-2.0; Svelte and Astro are MIT."
+  description="The open-source software Framelab ships in your browser, with each licence and a link to its source code. Mediabunny is MPL-2.0, Transformers.js Apache-2.0."
 >
   <article class="container prose">
     <h1>Licences</h1>
@@ -110,6 +142,34 @@ const shipped = [
       <code>/_astro/mediabunny-mp3-encoder-&lt;hash&gt;.js</code> (the hash changes with each build), which is loaded only when you choose MP3 output and
       holds no other Framelab code. You may replace that file with your own build of the encoder, including one made from a modified LAME.
     </p>
+
+    <h2 id="speech">Speech recognition (auto subtitles)</h2>
+    <p>
+      Auto subtitles runs OpenAI's <a href="https://github.com/openai/whisper">Whisper</a> model in your browser with Transformers.js and ONNX Runtime
+      Web. The Whisper weights were released by OpenAI under the <a href="https://github.com/openai/whisper/blob/main/LICENSE">MIT licence</a>; the
+      ONNX conversions come from the onnx-community repositories below, at the pinned revisions. A model is downloaded from this site only after you
+      confirm its size, and your audio never leaves your device.
+    </p>
+    <ul>
+      {
+        models.map((m) => (
+          <li>
+            <a href={m.source}>{m.name}</a>, revision <code class="hash">{m.revision}</code>
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      Transformers.js is used under the Apache License 2.0 (full text <a href="#apache-2.0">below</a>). One build-time change: the
+      <code>https://</code> prefix is removed from the absolute URLs inside Transformers.js and ONNX Runtime Web (default hosts and documentation links),
+      so the site names no third-party host; Framelab sets its own model and runtime locations at run time. No program logic is changed.
+    </p>
+
+    <h2 id="apache-2.0">Apache License, version 2.0</h2>
+    <details>
+      <summary>Show the full licence text</summary>
+      <pre class="license-text" tabindex="0">{apacheText}</pre>
+    </details>
 
     <h2 id="lgpl-2.0">GNU Library General Public License, version 2</h2>
     <details>
