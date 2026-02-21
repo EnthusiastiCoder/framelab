@@ -3,9 +3,11 @@
 // (<script type="module" src>, inline module scripts, <link rel="modulepreload">, and the component-url /
 // renderer-url of every <astro-island>), plus everything those files import STATICALLY (dynamic import() is lazy).
 // Budget: the gzip size of that graph is at most 150 KB (150 * 1024 bytes).
-// Naming contract (astro.config.mjs vite build.rollupOptions.output.manualChunks): the heavy engines are split
-// into chunks whose file names under dist/_astro/ contain "mediabunny", "ffmpeg" and "transformers"; none of
-// them may be in the initial graph.
+// Naming contract (astro.config.mjs manualChunks): the heavy engines are split into their own chunks under
+// dist/_astro/: the mediabunny core ("mediabunny-*.js", not an encoder), the MP3 encoder ("*mp3-encoder*"),
+// the speech-recognition worker ("asr-worker-*") and transformers.js ("*transformers*"); none of them may be in
+// the initial graph. (v1 has no ffmpeg.wasm, by decision, so the plan's "ffmpeg" chunk became the MP3 encoder and
+// the ASR worker: the same intent, heavy engines load lazily, checked for more chunks.)
 import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
@@ -14,7 +16,12 @@ import { DIST, attr, readDist, requireDist, tags } from '../helpers/dist';
 
 const PAGE = 'compress-video/index.html';
 const BUDGET = 150 * 1024;
-const HEAVY = ['mediabunny', 'ffmpeg', 'transformers'];
+const HEAVY: Array<[string, RegExp]> = [
+  ['mediabunny core', /^mediabunny-(?!mp3|flac)/],
+  ['MP3 encoder', /mp3-encoder/],
+  ['ASR worker', /^asr-worker-/],
+  ['transformers', /transformers/],
+];
 
 const STATIC_IMPORT = /(?:^|[;\s}])(?:import|export)\s*(?:[\w$*{},\s]*?\s*from\s*)?["']([^"']+\.m?js)["']/g;
 
@@ -76,16 +83,16 @@ describe('U26 bundle budget', () => {
     expect(total, `initial graph: ${graph.join(', ')}`).toBeLessThanOrEqual(BUDGET);
   });
 
-  it('the mediabunny, ffmpeg and transformers chunks exist in dist/_astro', () => {
+  it('the mediabunny core, MP3 encoder, ASR worker and transformers chunks exist in dist/_astro', () => {
     requireDist();
     const files = readdirSync(join(DIST, '_astro')).filter((f) => f.endsWith('.js'));
-    for (const name of HEAVY) {
-      expect(files.some((f) => f.toLowerCase().includes(name)), `a dist/_astro/*${name}*.js chunk`).toBe(true);
+    for (const [name, re] of HEAVY) {
+      expect(files.some((f) => re.test(f.toLowerCase())), `a dist/_astro chunk for the ${name} (${re})`).toBe(true);
     }
   });
 
-  it('no mediabunny, ffmpeg or transformers chunk is in the initial graph', () => {
-    const heavy = initialGraph().filter((u) => HEAVY.some((h) => posix.basename(u).toLowerCase().includes(h)));
+  it('no mediabunny, MP3 encoder, ASR worker or transformers chunk is in the initial graph', () => {
+    const heavy = initialGraph().filter((u) => HEAVY.some(([, re]) => re.test(posix.basename(u).toLowerCase())));
     expect(heavy).toEqual([]);
   });
 });
