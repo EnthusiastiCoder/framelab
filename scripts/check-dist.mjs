@@ -17,6 +17,10 @@ const URL_RE = /https?:\/\/[^\s"'`<>()\\]+/gi;
 
 /** URLs that are identifiers, not requests: XML namespaces and framework error-doc links. */
 const ALLOWED_URL = [
+  // The own origin of the site (the site setting in astro.config.mjs): canonical, Open Graph, sitemap and JSON-LD URLs.
+  /^https:\/\/framelab\.pages\.dev(\/|$)/i,
+  // schema.org vocabulary identifiers in JSON-LD (never fetched).
+  /^https:\/\/schema\.org\/?$/i,
   /^https?:\/\/www\.w3\.org\//i,
   /^https:\/\/svelte\.dev\/e\//i,
   // mediabunny: its MPL-2.0 licence header (must be kept) and spec links inside codec error messages.
@@ -25,8 +29,8 @@ const ALLOWED_URL = [
   /^https:\/\/aomediacodec\.github\.io\/av1-isobmff\/?\.?$/i,
 ];
 
-/** Pages whose job is to link to licences and sources. */
-const LINK_PAGES = /^(licenses|about)\//;
+/** Pages whose job is to link to licences and sources (the comparison page cites its dated sources). */
+const LINK_PAGES = /^(licenses|about|no-watermark-video-editor)\//;
 
 export function parseHeaders(text) {
   const rules = new Map();
