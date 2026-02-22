@@ -2,6 +2,7 @@
 // Tool landing page: heading and promise, the tool island above the fold (slot), then how-to, FAQ and related tools.
 import Base from './Base.astro';
 import { toolBySlug } from '../lib/tools';
+import { breadcrumbs, canonicalUrl, faqPage, howTo as howToLd, softwareApplication } from '../lib/seo';
 
 interface Props {
   title: string;
@@ -15,9 +16,21 @@ interface Props {
 
 const { title, description, h1, promise, howTo, faq, related } = Astro.props;
 const relatedTools = related.map((slug) => toolBySlug(slug)).filter((t) => t !== undefined);
+const site = Astro.site ?? new URL('https://framelab.pages.dev');
+const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
+const slug = path.replace(/^\//, '');
+const jsonLd = [
+  softwareApplication({ name: `Framelab: ${h1}`, description, url: canonicalUrl(site, path) }),
+  faqPage(faq),
+  howToLd({ name: h1, steps: howTo }),
+  breadcrumbs(site, [
+    { name: 'Tools', path: '/' },
+    { name: toolBySlug(slug)?.title ?? h1, path },
+  ]),
+];
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} jsonLd={jsonLd} ogImage={`/og/${slug}.png`}>
   <div class="container tool-page">
     <header class="intro">
       <h1>{h1}</h1>
