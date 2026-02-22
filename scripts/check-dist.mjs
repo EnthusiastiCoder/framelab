@@ -21,7 +21,7 @@ const ALLOWED_URL = [
   /^https:\/\/framelab\.pages\.dev(\/|$)/i,
   // schema.org vocabulary identifiers in JSON-LD (never fetched).
   /^https:\/\/schema\.org\/?$/i,
-  /^https?:\/\/www\.w3\.org\//i,
+  /^https?:\/\/www\.(w3|sitemaps)\.org\//i,
   /^https:\/\/svelte\.dev\/e\//i,
   // mediabunny: its MPL-2.0 licence header (must be kept) and spec links inside codec error messages.
   /^https?:\/\/mozilla\.org\/MPL\/2\.0\/?\.?$/i,
