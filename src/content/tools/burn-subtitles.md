@@ -14,6 +14,10 @@ faq:
     a: "Use the auto subtitles tool to transcribe speech on your device, or export an SRT or VTT file from any subtitle editor."
   - q: "Is my file uploaded to a server?"
     a: "No. Everything runs in your browser on your own device. The badge under the tool counts requests to other sites, and it stays at zero."
+  - q: "Is there a watermark, sign-up or size limit?"
+    a: "There is no watermark, no sign-up and no artificial limit. Very large files are limited only by your device's memory."
+  - q: "Will the video be made smaller or lower in resolution?"
+    a: "No. The result keeps the resolution of your video. As checked on 22 November 2026, Kapwing's free plan exported at up to 720p with a watermark, and Clideo's free exports carried a watermark."
 related: [auto-subtitles, compress-video, convert-video]
 ---
 
