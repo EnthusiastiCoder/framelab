@@ -16,6 +16,8 @@ faq:
     a: "No. Everything runs in your browser on your own device. The badge under the tool counts requests to other sites, and it stays at zero."
   - q: "Is there a watermark, sign-up or size limit?"
     a: "There is no watermark, no sign-up and no artificial limit. Very large files are limited only by your device's memory."
+  - q: "How is this different from online compressors?"
+    a: "As checked on 22 November 2026, Clideo's free plan accepted files up to 500 MB and added a watermark, and FreeConvert's free plan allowed 20 conversion minutes a day. Framelab compresses on your device, with no watermark and no daily limit."
 related: [resize-video, convert-video, trim-video]
 ---
 
