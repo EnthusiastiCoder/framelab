@@ -16,6 +16,10 @@ faq:
     a: "Tiny is the fastest and smallest. Base is a good balance and the default. Small makes the fewest mistakes but is the largest download and the slowest."
   - q: "How do I remove a downloaded model?"
     a: "Open the privacy page and press \"Delete downloaded models\". The next run asks before downloading again."
+  - q: "Can I download the subtitles as SRT or VTT for free?"
+    a: "Yes. SRT and VTT downloads and burned-in captions are free, with no watermark. As checked on 22 November 2026, Kapwing's free plan limited auto subtitles to 10 minutes and kept SRT and VTT downloads for paid plans."
+  - q: "Is there a length limit or a watermark?"
+    a: "No. There is no length cap, no watermark and no sign-up. Long recordings simply take longer, and the time depends on your device."
 related: [burn-subtitles, extract-audio, cut-video]
 ---
 
