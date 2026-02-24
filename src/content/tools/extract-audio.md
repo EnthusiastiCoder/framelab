@@ -16,6 +16,8 @@ faq:
     a: "No. Everything runs in your browser on your own device. The badge under the tool counts requests to other sites, and it stays at zero."
   - q: "Is there a watermark, sign-up or size limit?"
     a: "There is no watermark, no sign-up and no artificial limit. Very large files are limited only by your device's memory."
+  - q: "Do I need to sign up or install anything?"
+    a: "No. There is no account, no install and no daily limit. The page works in Chrome, Edge, Firefox and Safari, and keeps working offline after your first visit."
 related: [video-to-mp3, audio-converter, audio-cutter]
 ---
 
