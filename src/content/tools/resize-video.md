@@ -16,6 +16,8 @@ faq:
     a: "No. Everything runs in your browser on your own device. The badge under the tool counts requests to other sites, and it stays at zero."
   - q: "Is there a watermark, sign-up or size limit?"
     a: "There is no watermark, no sign-up and no artificial limit. Very large files are limited only by your device's memory."
+  - q: "Will the resized video have a watermark?"
+    a: "No, never. As checked on 22 November 2026, Kapwing's free plan watermarked every export at up to 720p, and VEED listed no watermark only on a paid plan. Framelab exports at the size you pick, with no mark."
 related: [crop-video, compress-video, video-to-gif]
 ---
 
