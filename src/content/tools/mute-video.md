@@ -16,7 +16,9 @@ faq:
     a: There are no artificial limits, no watermark and no sign-up. Very large files are limited only by your device's memory.
   - q: Which formats work?
     a: MP4, MOV, WebM and MKV videos. MP4 and MOV come out as MP4, WebM and MKV come out as WebM.
-related: []
+  - q: "How is this different from online video editors?"
+    a: "As checked on 22 November 2026, Kapwing's free plan watermarked every export and Clideo's free exports carried a watermark. Framelab mutes the video on your device, with no watermark, upload or account."
+related: [trim-video, extract-audio, compress-video]
 ---
 
 Muting a video is the quickest way to drop background noise, music you do not have the rights to, or a private conversation before you share a clip. Framelab does it right in your browser with WebCodecs, the same media engine your browser uses to play video.
