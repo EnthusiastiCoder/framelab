@@ -16,6 +16,8 @@ faq:
     a: "No. Everything runs in your browser on your own device. The badge under the tool counts requests to other sites, and it stays at zero."
   - q: "Is there a watermark, sign-up or size limit?"
     a: "There is no watermark, no sign-up and no artificial limit. Very large files are limited only by your device's memory."
+  - q: "Is there a daily limit?"
+    a: "No. Convert as many videos as you like. As checked on 22 November 2026, CloudConvert's free plan allowed 10 conversions a day and FreeConvert's allowed 20 conversion minutes a day."
 related: [extract-audio, audio-converter, audio-cutter]
 ---
 
