@@ -1,0 +1,164 @@
+---
+// Comparison page. It cites only the free-plan checks made live on 2026-11-22, each with its date and source.
+import Base from '../layouts/Base.astro';
+import { breadcrumbs, faqPage } from '../lib/seo';
+
+const CHECKED = '22 November 2026';
+
+const rows = [
+  {
+    name: 'Kapwing',
+    free: 'Watermark on every free export; exports up to 4 minutes long, 720p and 30 minutes a month; sign-in needed to edit; auto subtitles up to 10 minutes, SRT and VTT download on paid plans.',
+    source: 'https://www.kapwing.com/pricing',
+  },
+  {
+    name: 'VEED',
+    free: '"Start for free" leads to sign-up; "No watermark" is listed only under the paid Creator plan.',
+    source: 'https://www.veed.io/pricing',
+  },
+  {
+    name: 'Clideo',
+    free: 'Free plan says "Export with watermark"; uploads up to 500 MB.',
+    source: 'https://clideo.com/pricing',
+  },
+  {
+    name: 'CloudConvert',
+    free: '"Start free with 10 conversions per day."',
+    source: 'https://cloudconvert.com/pricing',
+  },
+  {
+    name: 'FreeConvert',
+    free: '20 conversion minutes a day and at most 5 conversion minutes per file on the free plan; "No Ads" is a paid feature.',
+    source: 'https://www.freeconvert.com/pricing',
+  },
+];
+
+const faq = [
+  {
+    q: 'Is Framelab really free, with no watermark?',
+    a: 'Yes. Every tool is free, with no watermark, no sign-up and no ads. There is no paid plan to upgrade to.',
+  },
+  {
+    q: 'Are there limits on length, size or daily use?',
+    a: 'No artificial limits. Very large files are limited only by the memory of your device, and Framelab tells you before that becomes a problem.',
+  },
+  {
+    q: 'Is my video uploaded?',
+    a: 'No. The tools run in your browser on your own device, and a badge on every page counts requests to other sites. It stays at zero.',
+  },
+  {
+    q: 'Where do the numbers about other services come from?',
+    a: `From each service's own pricing page, checked on ${CHECKED}. Plans change, so follow the source links for the current terms.`,
+  },
+];
+
+const site = Astro.site ?? new URL('https://framelab.pages.dev');
+const jsonLd = [
+  faqPage(faq),
+  breadcrumbs(site, [
+    { name: 'Tools', path: '/' },
+    { name: 'No-watermark video editor', path: '/no-watermark-video-editor' },
+  ]),
+];
+---
+
+<Base
+  title="Free Video Editor With No Watermark, No Sign-up | Framelab"
+  description="Trim, cut, compress, convert and subtitle videos with no watermark, no sign-up and no limits. Compare free plans of popular online editors, checked 22 Nov 2026."
+  jsonLd={jsonLd}
+  ogImage="/og/no-watermark-video-editor.png"
+>
+  <article class="container compare">
+    <header>
+      <h1>A free video editor with no watermark</h1>
+      <p class="lead">
+        Framelab's tools run in your browser. No watermark, no sign-up, no upload and no limit on length, size or daily use.
+      </p>
+      <p><a class="btn" href="/">Pick a tool</a></p>
+    </header>
+
+    <section aria-labelledby="table-title">
+      <h2 id="table-title">Free plans compared</h2>
+      <p class="muted">Each row quotes the service's own pricing page, checked on {CHECKED}. Plans change; follow the source for current terms.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Service</th><th scope="col">Free plan (checked {CHECKED})</th><th scope="col">Source</th></tr>
+          </thead>
+          <tbody>
+            <tr class="ours">
+              <th scope="row">Framelab</th>
+              <td>No watermark, no sign-up, no ads, no upload, and no limit on length, resolution, size or daily use.</td>
+              <td>This site</td>
+            </tr>
+            {
+              rows.map((r) => (
+                <tr>
+                  <th scope="row">{r.name}</th>
+                  <td>{r.free}</td>
+                  <td>
+                    <a href={r.source} rel="nofollow noopener noreferrer">{r.name} pricing</a>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="faq">
+      <h2 id="faq">Questions</h2>
+      {
+        faq.map((item) => (
+          <details>
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        ))
+      }
+    </section>
+  </article>
+</Base>
+
+<style>
+  .compare {
+    padding-top: var(--space-6);
+  }
+  .lead {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    max-width: 60ch;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  th,
+  td {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border);
+  }
+  .ours {
+    background: var(--accent-soft);
+  }
+  details {
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-3) 0;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  details p {
+    margin: var(--space-2) 0 0;
+    color: var(--text-muted);
+  }
+</style>
