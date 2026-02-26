@@ -16,6 +16,8 @@ faq:
     a: "No. Everything runs in your browser on your own device. The badge under the tool counts requests to other sites, and it stays at zero."
   - q: "Is there a watermark, sign-up or size limit?"
     a: "There is no watermark, no sign-up and no artificial limit. Very large files are limited only by your device's memory."
+  - q: "How is this different from online video trimmers?"
+    a: "As checked on 22 November 2026, Kapwing's free plan capped exports at 4 minutes and 720p with a watermark, and Clideo's free plan added a watermark. Framelab trims on your device with no length cap and no watermark."
 related: [cut-video, video-to-gif, compress-video]
 ---
 
