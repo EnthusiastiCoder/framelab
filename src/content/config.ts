@@ -9,8 +9,8 @@ const tools = defineCollection({
     description: z.string().min(120).max(160),
     h1: z.string(),
     promise: z.string(),
-    howTo: z.array(z.string()).min(2),
-    faq: z.array(z.object({ q: z.string(), a: z.string() })).min(2),
+    howTo: z.array(z.string()).length(3),
+    faq: z.array(z.object({ q: z.string(), a: z.string() })).min(4).max(6),
     related: z.array(z.string()).default([]),
   }),
 });
