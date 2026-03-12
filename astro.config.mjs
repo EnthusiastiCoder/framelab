@@ -2,13 +2,14 @@
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import stripRemoteUrls from './scripts/vite-strip-remote-urls.mjs';
+import serviceWorker from './scripts/sw.mjs';
 
 export default defineConfig({
   output: 'static',
   site: 'https://framelab.pages.dev',
   trailingSlash: 'ignore',
   build: { format: 'directory', inlineStylesheets: 'never' },
-  integrations: [svelte()],
+  integrations: [svelte(), serviceWorker()],
   vite: {
     // Never inline scripts or assets: the CSP allows only same-origin scripts plus the hashed island bootstrap.
     build: { assetsInlineLimit: 0 },
