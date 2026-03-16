@@ -1,4 +1,4 @@
-/* Design tokens. Light by default, dark via prefers-color-scheme. Text/background pairs meet WCAG AA. */
+/* Design tokens. Light by default, dark via prefers-color-scheme or the theme toggle. Text/background pairs meet WCAG AA. */
 :root {
   color-scheme: light dark;
 
@@ -39,8 +39,9 @@
   --duration: 160ms;
 }
 
+/* Dark: follows the system unless the theme toggle chose light or dark (data-theme on <html>). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #0f1117;
     --surface: #171a23;
     --surface-2: #20242f;
@@ -60,6 +61,32 @@
     --focus: #b8b2ff;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f1117;
+  --surface: #171a23;
+  --surface-2: #20242f;
+  --text: #eceef4;
+  --text-muted: #a9afc0;
+  --border: #2f3442;
+  --accent: #9d94ff;
+  --accent-hover: #b8b2ff;
+  --accent-text: #11131a;
+  --accent-soft: #252145;
+  --success: #5fd391;
+  --success-soft: #15291e;
+  --warning: #f2b45a;
+  --warning-soft: #2c2213;
+  --danger: #ff8a93;
+  --danger-soft: #331a1d;
+  --focus: #b8b2ff;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {
