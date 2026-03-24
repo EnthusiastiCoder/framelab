@@ -25,6 +25,7 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
   '.xml': 'application/xml',
   '.mp4': 'video/mp4',
+  '.m4a': 'audio/mp4',
   '.webm': 'video/webm',
 };
 
