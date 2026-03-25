@@ -1,0 +1,22 @@
+---
+// Offline fallback: the service worker shows this when a page that was never visited is opened without a network.
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="You are offline | Framelab"
+  description="You are offline and this page has not been saved on this device yet. Tools you opened before still work offline."
+  noindex
+>
+  <div class="container offline">
+    <h1>You are offline</h1>
+    <p>This page has not been saved on this device yet. Tools you have opened before still work without a network.</p>
+    <p><a href="/">See all tools</a></p>
+  </div>
+</Base>
+
+<style>
+  .offline {
+    padding-top: var(--space-7);
+  }
+</style>
