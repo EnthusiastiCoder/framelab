@@ -6,11 +6,37 @@
     label?: string;
     hint?: string;
     disabled?: boolean;
+    /** A tiny bundled sample (same origin) offered in the empty state as "Try a sample file". */
+    sample?: { url: string; name: string; type: string };
     onfiles: (files: File[]) => void;
   }
 
-  let { accept = 'video/*', multiple = false, label = 'Drop a video here', hint = 'or click to choose a file', disabled = false, onfiles }: Props =
-    $props();
+  let {
+    accept = 'video/*',
+    multiple = false,
+    label = 'Drop a video here',
+    hint = 'or click to choose a file',
+    disabled = false,
+    sample,
+    onfiles,
+  }: Props = $props();
+
+  let loadingSample = $state(false);
+
+  async function trySample() {
+    if (!sample || disabled || loadingSample) return;
+    loadingSample = true;
+    try {
+      const res = await fetch(sample.url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      onfiles([new File([blob], sample.name, { type: sample.type })]);
+    } catch {
+      window.dispatchEvent(new CustomEvent('framelab:toast', { detail: { message: 'The sample file could not be loaded.' } }));
+    } finally {
+      loadingSample = false;
+    }
+  }
 
   let input: HTMLInputElement;
   let dragging = $state(false);
@@ -77,6 +103,11 @@
     (e.currentTarget as HTMLInputElement).value = '';
   }}
 />
+{#if sample}
+  <button type="button" class="btn btn-secondary sample" disabled={disabled || loadingSample} onclick={trySample}>
+    {loadingSample ? 'Loading the sample…' : 'Try a sample file'}
+  </button>
+{/if}
 </div>
 
 <style>
@@ -110,6 +141,9 @@
   .dropzone.disabled {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+  .sample {
+    margin-top: var(--space-3);
   }
   .label {
     color: var(--text);
