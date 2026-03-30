@@ -30,13 +30,14 @@
   import ExportPanel from './ExportPanel.svelte';
   import ErrorCard from './ErrorCard.svelte';
   import CapabilityBanner from './CapabilityBanner.svelte';
-  import NetworkProof from './NetworkProof.svelte';
   import UnsupportedBrowser from './UnsupportedBrowser.svelte';
   import { detectCapabilities, missingFeatures, WASM_ENCODERS, type Capabilities } from '../engine/capabilities';
   import { planPath, type Plan } from '../engine/planner';
   import { assessMemory } from '../engine/memory';
   import { EngineClient } from '../engine/client';
   import { EngineError, toErrorCode, type EngineErrorCode, type Progress, type Result } from '../engine/types';
+  import { isHandoffPage, takeHandoff } from '../lib/handoff';
+  import { sampleFor } from '../lib/samples';
 
   interface Props {
     /** Accessible name of the tool section, e.g. "Compress video tool". */
@@ -78,6 +79,8 @@
   let notice = $state('');
   let memoryMessage = $state('');
   let error = $state<{ code: EngineErrorCode; message: string } | null>(null);
+  let outputDuration = $state<number | undefined>(undefined);
+  let inputSummary = $state<{ size: number; duration: number } | null>(null);
 
   let client: EngineClient | null = null;
   let controller: AbortController | null = null;
@@ -97,8 +100,9 @@
     const q = new URLSearchParams(location.search);
     slowMs = q.get('slow') === '1' ? 3000 : 0;
     memtest = q.has('memtest');
+    const handoff = isHandoffPage();
     let alive = true;
-    detectCapabilities(window).then((c) => {
+    detectCapabilities(window).then(async (c) => {
       if (!alive) return;
       caps = c;
       missing = missingFeatures(c);
@@ -108,6 +112,10 @@
         status = 'unsupported';
       } else {
         status = file ? status : 'empty';
+        if (handoff) {
+          const f = await takeHandoff();
+          if (alive && f) void onfiles([f]);
+        }
       }
     });
     return () => {
@@ -191,6 +199,8 @@
     controller = new AbortController();
     error = null;
     result = null;
+    outputDuration = undefined;
+    inputSummary = { size: file.size, duration: info?.duration ?? 0 };
     notice = plan.fallback ? plan.reason : '';
     progress = { phase: 'reading', ratio: 0 };
     status = 'running';
@@ -200,6 +210,7 @@
       if (token !== runToken) return;
       result = r;
       status = 'done';
+      void measureOutput(r, token);
     } catch (err) {
       if (token !== runToken) return;
       status = 'ready';
@@ -209,6 +220,17 @@
         controller = null;
         progress = null;
       }
+    }
+  }
+
+  /** Reads the output's duration for the before/after summary (skipped for formats the prober cannot read, e.g. GIF). */
+  async function measureOutput(r: Result, token: number) {
+    if (!/^(video|audio)\//.test(r.mimeType)) return;
+    try {
+      const probed = await engine().probe(new File([r.blob], r.filename, { type: r.mimeType }));
+      if (token === runToken) outputDuration = probed.duration;
+    } catch {
+      /* the summary shows sizes only */
     }
   }
 
@@ -243,7 +265,14 @@
   {/if}
 
   {#if status !== 'running' && status !== 'done'}
-    <DropZone {accept} label={dropLabel} hint="or press Enter to choose a file" disabled={status === 'unsupported'} {onfiles} />
+    <DropZone
+      {accept}
+      label={dropLabel}
+      hint="or press Enter to choose a file"
+      disabled={status === 'unsupported'}
+      sample={file ? undefined : sampleFor(needs)}
+      {onfiles}
+    />
   {/if}
 
   {#if error}
@@ -254,7 +283,7 @@
     <div class="file card">
       <div class="file-row">
         <div>
-          <p class="name">{file.name}</p>
+          <p class="name" data-testid="loaded-file">{file.name}</p>
           <p class="muted small">
             {#if info.width}{info.width}×{info.height} · {/if}{seconds(info.duration)}{info.videoCodec ? ` · ${info.videoCodec}` : ''}{info.audioCodec
               ? ` · ${info.audioCodec} audio`
@@ -306,10 +335,8 @@
   {/if}
 
   {#if status === 'done' && result}
-    <ExportPanel {result} {notice} onreset={reset} />
+    <ExportPanel {result} {notice} input={inputSummary ?? undefined} {outputDuration} onreset={reset} />
   {/if}
-
-  <NetworkProof />
 </section>
 
 <style>
