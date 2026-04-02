@@ -6,12 +6,13 @@
   import ExportPanel from '../ExportPanel.svelte';
   import ErrorCard from '../ErrorCard.svelte';
   import CapabilityBanner from '../CapabilityBanner.svelte';
-  import NetworkProof from '../NetworkProof.svelte';
   import UnsupportedBrowser from '../UnsupportedBrowser.svelte';
   import { detectCapabilities, missingFeatures } from '../../engine/capabilities';
   import { planPath } from '../../engine/planner';
   import { EngineClient } from '../../engine/client';
   import { EngineError, toErrorCode, type EngineErrorCode, type InputInfo, type Progress, type Result } from '../../engine/types';
+  import { isHandoffPage, takeHandoff } from '../../lib/handoff';
+  import { VIDEO_SAMPLE } from '../../lib/samples';
 
   type Status = 'checking' | 'unsupported' | 'empty' | 'probing' | 'ready' | 'running' | 'done';
 
@@ -30,8 +31,9 @@
 
   onMount(() => {
     slowMs = new URLSearchParams(location.search).get('slow') === '1' ? 3000 : 0;
+    const handoff = isHandoffPage();
     let alive = true;
-    detectCapabilities(window).then((caps) => {
+    detectCapabilities(window).then(async (caps) => {
       if (!alive) return;
       missing = missingFeatures(caps);
       const plan = planPath({ op: 'mute' }, caps, {});
@@ -40,6 +42,10 @@
         status = 'unsupported';
       } else {
         status = file ? status : 'empty';
+        if (handoff) {
+          const f = await takeHandoff();
+          if (alive && f) void onfiles([f]);
+        }
       }
     });
     return () => {
@@ -133,7 +139,7 @@
   {/if}
 
   {#if status !== 'running' && status !== 'done'}
-    <DropZone accept="video/*" label="Drop a video here" hint="or press Enter to choose a file" disabled={status === 'unsupported'} {onfiles} />
+    <DropZone accept="video/*" label="Drop a video here" hint="or press Enter to choose a file" disabled={status === 'unsupported'} sample={file ? undefined : VIDEO_SAMPLE} {onfiles} />
   {/if}
 
   {#if error}
@@ -144,7 +150,7 @@
     <div class="file card">
       <div class="file-row">
         <div>
-          <p class="name">{file.name}</p>
+          <p class="name" data-testid="loaded-file">{file.name}</p>
           <p class="muted small">
             {info.width}×{info.height} · {seconds(info.duration)} · {info.videoCodec ?? 'video'}{info.audioCodec ? ` + ${info.audioCodec} audio` : ', no audio'}
           </p>
@@ -168,10 +174,8 @@
   {/if}
 
   {#if status === 'done' && result}
-    <ExportPanel {result} onreset={reset} />
+    <ExportPanel {result} input={file && info ? { size: file.size, duration: info.duration } : undefined} outputDuration={info?.duration} onreset={reset} />
   {/if}
-
-  <NetworkProof />
 </section>
 
 <style>
