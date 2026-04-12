@@ -6,7 +6,6 @@
   import ProgressPanel from '../ProgressPanel.svelte';
   import ExportPanel from '../ExportPanel.svelte';
   import ErrorCard from '../ErrorCard.svelte';
-  import NetworkProof from '../NetworkProof.svelte';
   import SubtitleEditor from '../SubtitleEditor.svelte';
   import ModelConsentDialog from '../ModelConsentDialog.svelte';
   import CaptionStylePanel from '../CaptionStylePanel.svelte';
@@ -24,6 +23,7 @@
   import { saveSubtitles } from '../../subtitles/files';
   import { DEFAULT_STYLE, type CaptionStyle } from '../../subtitles/style';
   import type { Cue } from '../../subtitles/cue';
+  import { isHandoffPage, takeHandoff } from '../../lib/handoff';
 
   type Status = 'empty' | 'probing' | 'ready' | 'transcribing' | 'editing' | 'burning' | 'done';
 
@@ -62,6 +62,7 @@
     }
     gate = createDownloadGate(storage);
     detectCapabilities(window).then((c) => (caps = c));
+    if (isHandoffPage()) void takeHandoff().then((f) => f && onfiles([f]));
     return () => {
       controller?.abort();
       engine?.dispose();
@@ -214,7 +215,7 @@
 
   {#if file && info}
     <div class="card file">
-      <p class="name">{file.name}</p>
+      <p class="name" data-testid="loaded-file">{file.name}</p>
       <p class="muted small">Speech recognition runs on this device. Your audio is never uploaded.</p>
     </div>
   {/if}
@@ -269,10 +270,8 @@
   {/if}
 
   {#if status === 'done' && result}
-    <ExportPanel {result} notice={resultNotice} onreset={backToEditor} />
+    <ExportPanel {result} notice={resultNotice} onreset={backToEditor} resetLabel="Back to the subtitles" />
   {/if}
-
-  <NetworkProof />
 </section>
 
 <style>
