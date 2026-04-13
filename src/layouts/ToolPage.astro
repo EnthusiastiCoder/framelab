@@ -1,6 +1,7 @@
 ---
 // Tool landing page: heading and promise, the tool island above the fold (slot), then how-to, FAQ and related tools.
 import Base from './Base.astro';
+import NetworkProof from '../components/NetworkProof.astro';
 import { toolBySlug } from '../lib/tools';
 import { breadcrumbs, canonicalUrl, faqPage, howTo as howToLd, softwareApplication } from '../lib/seo';
 
@@ -30,13 +31,14 @@ const jsonLd = [
 ];
 ---
 
-<Base title={title} description={description} jsonLd={jsonLd} ogImage={`/og/${slug}.png`}>
-  <div class="container tool-page">
+<Base title={title} description={description} jsonLd={jsonLd} ogImage={`/og/${slug}.png`} proofInFooter={false}>
+  <div class="container tool-page" data-tool-page>
     <header class="intro">
       <h1>{h1}</h1>
       <p class="promise">{promise}</p>
     </header>
     <slot />
+    <div class="proof-row"><NetworkProof /></div>
     <section aria-labelledby="how">
       <h2 id="how">How it works</h2>
       <ol class="steps">{howTo.map((step) => <li>{step}</li>)}</ol>
@@ -83,6 +85,9 @@ const jsonLd = [
     font-size: 1.15rem;
     color: var(--text-muted);
     max-width: 60ch;
+  }
+  .proof-row {
+    margin-top: var(--space-4);
   }
   .steps {
     padding-left: var(--space-5);
