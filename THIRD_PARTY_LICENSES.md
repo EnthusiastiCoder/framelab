@@ -77,3 +77,11 @@ The Whisper code and model weights were released by OpenAI under the MIT licence
 | jsdom | MIT |
 
 Test fixtures in `tests/fixtures/` are generated locally (ffmpeg CLI and Windows speech synthesis) and are our own media.
+
+The sample files in `public/samples/` (offered by "Try a sample file") are copies of two of those fixtures
+(`h264-aac-640x360-5s.mp4` and `tone-10s.m4a`: a generated test pattern and a sine tone), so they are our own media too.
+The Open Graph images in `public/og/` and the app icons in `public/icons/` are rendered from Framelab's own markup by
+`scripts/og-images.mjs`; they contain no third-party artwork or fonts.
+
+WS4 (SEO, offline support, polish) added no new dependency: the service worker (`scripts/sw.mjs`), the sitemap
+endpoint and the manifest are hand-written.
