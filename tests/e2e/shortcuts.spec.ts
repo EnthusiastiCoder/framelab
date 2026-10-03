@@ -40,7 +40,7 @@ test('E38 typing "?" in a text field does not open the shortcut sheet', async ({
     input.type = 'text';
     input.id = 'e38-field';
     input.setAttribute('aria-label', 'E38 field');
-    document.body.prepend(input);
+    document.querySelector('main')!.prepend(input);
   });
   await page.locator('#e38-field').focus();
   await page.keyboard.press('Shift+Slash');
